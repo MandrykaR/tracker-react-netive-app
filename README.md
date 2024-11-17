@@ -13,9 +13,7 @@
 
 | **Step**                                **Command**
 
-| **Install dependencies:**               `npm install` 
-
-| **Start the development server:**       `npm start`
+| **Start the development server:**       `npx expo start`
 
 ### Author
 
