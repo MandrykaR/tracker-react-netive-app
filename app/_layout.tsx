@@ -1,34 +1,53 @@
-// app/_layout.tsx
 import React from 'react'
-import {
-	ThemeProvider,
-	DarkTheme,
-	DefaultTheme,
-} from '@react-navigation/native'
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
 import { useColorScheme } from 'react-native'
-import { Stack } from 'expo-router'
+import HomeScreen from './index'
+import AddTransaction from './AddTransaction'
+import ReportsScreen from './ReportsScreen'
+
+const Tab = createMaterialTopTabNavigator()
 
 export default function Layout() {
 	const colorScheme = useColorScheme()
-
-	const headerBackgroundColor = colorScheme === 'dark' ? '#1D3D47' : '#A1CEDC'
-	const headerTintColor = colorScheme === 'dark' ? '#fff' : '#000'
+	const isDarkMode = colorScheme === 'dark'
 
 	return (
-		<ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-			<Stack
-				screenOptions={{
-					headerStyle: {
-						backgroundColor: headerBackgroundColor,
-					},
-					headerTintColor: headerTintColor,
-					headerShadowVisible: false,
+		<Tab.Navigator
+			screenOptions={{
+				tabBarStyle: {
+					backgroundColor: isDarkMode ? '#1D3D47' : '#A1CEDC',
+				},
+				tabBarIndicatorStyle: {
+					backgroundColor: isDarkMode ? '#fff' : '#000',
+				},
+				tabBarLabelStyle: {
+					color: isDarkMode ? '#FFF' : '#000',
+					fontWeight: 'bold',
+					fontSize: 18,
+				},
+			}}
+		>
+			<Tab.Screen
+				name='index'
+				component={HomeScreen}
+				options={{
+					tabBarLabel: 'Dashboard',
 				}}
-			>
-				<Stack.Screen name='index' options={{ title: 'Home' }} />
-				<Stack.Screen name='AddTransaction' />
-				<Stack.Screen name='Reports' />
-			</Stack>
-		</ThemeProvider>
+			/>
+			<Tab.Screen
+				name='AddTransaction'
+				component={AddTransaction}
+				options={{
+					tabBarLabel: 'Transaction',
+				}}
+			/>
+			<Tab.Screen
+				name='ReportsScreen'
+				component={ReportsScreen}
+				options={{
+					tabBarLabel: 'Reports',
+				}}
+			/>
+		</Tab.Navigator>
 	)
 }

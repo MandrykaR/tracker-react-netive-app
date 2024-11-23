@@ -5,32 +5,56 @@ import {
 	TextInput,
 	Button,
 	StyleSheet,
+	Alert,
 	useColorScheme,
 } from 'react-native'
-import { NativeStackScreenProps } from '@react-navigation/native-stack'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
-type RootStackParamList = {
-	Home: undefined
-	AddTransaction: undefined
-	Reports: undefined
+interface Transaction {
+	id: number
+	title: string
+	amount: number
+	date: string
 }
 
-type AddTransactionScreenProps = NativeStackScreenProps<
-	RootStackParamList,
-	'AddTransaction'
->
-
-export default function AddTransactionScreen({
-	navigation,
-}: AddTransactionScreenProps) {
-	const colorScheme = useColorScheme() // Defining the current topic
-	const isDarkMode = colorScheme === 'dark' // Determining whether a dark theme is used
+export default function AddTransaction() {
+	const colorScheme = useColorScheme()
+	const isDarkMode = colorScheme === 'dark'
 
 	const [title, setTitle] = useState('')
 	const [amount, setAmount] = useState('')
 
-	const handleAddTransaction = () => {
-		navigation.goBack()
+	const handleAddTransaction = async () => {
+		if (!title.trim() || !amount.trim()) {
+			Alert.alert('Error', 'Please fill in both fields.')
+			return
+		}
+
+		const transaction: Transaction = {
+			id: Date.now(),
+			title,
+			amount: parseFloat(amount),
+			date: new Date().toISOString(),
+		}
+
+		try {
+			const storedTransactions = await AsyncStorage.getItem('transactions')
+			const transactions = storedTransactions
+				? JSON.parse(storedTransactions)
+				: []
+			const updatedTransactions = [...transactions, transaction]
+			await AsyncStorage.setItem(
+				'transactions',
+				JSON.stringify(updatedTransactions)
+			)
+
+			setTitle('')
+			setAmount('')
+			Alert.alert('Success', 'Transaction added!')
+		} catch (error) {
+			console.error('Error saving transaction:', error)
+			Alert.alert('Error', 'Failed to save the transaction.')
+		}
 	}
 
 	return (

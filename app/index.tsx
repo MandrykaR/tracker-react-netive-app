@@ -1,34 +1,53 @@
-import React from 'react'
-import { View, Text, StyleSheet } from 'react-native'
-import { useColorScheme } from 'react-native'
-import { Link } from 'expo-router' 
+import React, { useState, useEffect } from 'react'
+import { View, Text, FlatList, StyleSheet, useColorScheme } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+
+interface Transaction {
+	id: number
+	title: string
+	amount: number
+	date: string
+}
 
 export default function HomeScreen() {
 	const colorScheme = useColorScheme()
+	const isDarkMode = colorScheme === 'dark'
 
-	const backgroundColor = colorScheme === 'dark' ? '#121212' : '#ffffff'
-	const textColor = colorScheme === 'dark' ? '#fff' : '#000'
-	const buttonColor = colorScheme === 'dark' ? '#4CAF50' : '#007BFF'
+	const [transactions, setTransactions] = useState<Transaction[]>([])
+
+	useEffect(() => {
+		const loadTransactions = async () => {
+			const storedTransactions = await AsyncStorage.getItem('transactions')
+			if (storedTransactions) {
+				setTransactions(JSON.parse(storedTransactions))
+			}
+		}
+		loadTransactions()
+	}, [])
+
+	const renderItem = ({ item }: { item: Transaction }) => (
+		<View style={styles.transaction}>
+			<Text style={[styles.text, { color: isDarkMode ? '#fff' : '#000' }]}>
+				{item.title} - ${item.amount}
+			</Text>
+		</View>
+	)
 
 	return (
-		<View style={[styles.container, { backgroundColor }]}>
-			<Text style={[styles.text, { color: textColor }]}>
-				Welcome to Home Screen
+		<View
+			style={[
+				styles.container,
+				{ backgroundColor: isDarkMode ? '#000' : '#fff' },
+			]}
+		>
+			<Text style={[styles.title, { color: isDarkMode ? '#fff' : '#000' }]}>
+				Transactions
 			</Text>
-
-			<Link
-				href='/AddTransactionScreen'
-				style={[styles.button, { backgroundColor: buttonColor }]}
-			>
-				<Text style={styles.buttonText}>Add Transaction</Text>
-			</Link>
-
-			<Link
-				href='/ReportsScreen'
-				style={[styles.button, { backgroundColor: buttonColor }]}
-			>
-				<Text style={styles.buttonText}>Reports</Text>
-			</Link>
+			<FlatList
+				data={transactions}
+				renderItem={renderItem}
+				keyExtractor={item => item.id.toString()}
+			/>
 		</View>
 	)
 }
@@ -36,24 +55,19 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		justifyContent: 'center',
-		alignItems: 'center',
 		padding: 16,
 	},
-	text: {
-		fontSize: 20,
-		marginBottom: 20,
-	},
-	button: {
-		width: '80%',
-		paddingVertical: 10,
-		marginVertical: 8,
-		borderRadius: 5,
-		alignItems: 'center',
-	},
-	buttonText: {
-		color: '#fff',
-		fontSize: 16,
+	title: {
+		fontSize: 24,
 		fontWeight: 'bold',
+		marginBottom: 16,
+	},
+	transaction: {
+		padding: 10,
+		borderBottomWidth: 1,
+		marginBottom: 8,
+	},
+	text: {
+		fontSize: 16,
 	},
 })
