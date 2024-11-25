@@ -8,21 +8,14 @@ import {
 	Alert,
 	useColorScheme,
 } from 'react-native'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useTransactions } from './TransactionContext'
 
-interface Transaction {
-	id: number
-	title: string
-	amount: number
-	date: string
-}
-
-export default function AddTransaction() {
+const AddTransaction = () => {
 	const colorScheme = useColorScheme()
 	const isDarkMode = colorScheme === 'dark'
-
 	const [title, setTitle] = useState('')
 	const [amount, setAmount] = useState('')
+	const { addTransaction } = useTransactions()
 
 	const handleAddTransaction = async () => {
 		if (!title.trim() || !amount.trim()) {
@@ -30,31 +23,18 @@ export default function AddTransaction() {
 			return
 		}
 
-		const transaction: Transaction = {
+		const transaction = {
 			id: Date.now(),
 			title,
 			amount: parseFloat(amount),
 			date: new Date().toISOString(),
 		}
 
-		try {
-			const storedTransactions = await AsyncStorage.getItem('transactions')
-			const transactions = storedTransactions
-				? JSON.parse(storedTransactions)
-				: []
-			const updatedTransactions = [...transactions, transaction]
-			await AsyncStorage.setItem(
-				'transactions',
-				JSON.stringify(updatedTransactions)
-			)
+		await addTransaction(transaction)
 
-			setTitle('')
-			setAmount('')
-			Alert.alert('Success', 'Transaction added!')
-		} catch (error) {
-			console.error('Error saving transaction:', error)
-			Alert.alert('Error', 'Failed to save the transaction.')
-		}
+		setTitle('')
+		setAmount('')
+		Alert.alert('Success', 'Transaction added!')
 	}
 
 	return (
@@ -117,3 +97,5 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 8,
 	},
 })
+
+export default AddTransaction
