@@ -33,25 +33,22 @@ const HomeScreen = () => {
          ]}
       >
          <View style={styles.transactionContent}>
-            <Text
-               style={[styles.text, { color: isDarkMode ? '#fff' : '#000' }]}
-            >
-               {item.title} - ${item.amount.toFixed(2)}
+            <Text style={[styles.text, { color: isDarkMode ? '#fff' : '#000' }]}>
+               {item.title} - ${item.amount != null ? item.amount.toFixed(2) : '0.00'}
             </Text>
 
-            {/* Показываем фотографию чека, если она есть */}
             {item.receipt && (
                <Image source={{ uri: item.receipt }} style={styles.receiptImage} />
             )}
          </View>
 
          <Button
-            title='Delete'
+            title="Delete"
             onPress={() => handleDeleteTransaction(item.id)}
-            color='#F44336'
+            color="#F44336"
          />
       </View>
-   )
+   );
 
    return (
       <View

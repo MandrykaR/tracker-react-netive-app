@@ -18,7 +18,6 @@ if (Platform.OS !== 'web') {
 
 import { useTransactions } from './TransactionContext'
 
-// Для определения платформы (web или native)
 const isWeb = Platform.OS === 'web'
 
 const AddTransaction: React.FC = () => {
@@ -28,18 +27,16 @@ const AddTransaction: React.FC = () => {
    const [amount, setAmount] = useState<string>('')
    const [receiptImage, setReceiptImage] = useState<string | null>(null)
    const [cameraPermission, setCameraPermission] = useState<boolean>(false)
-   const cameraRef = useRef<any>(null) // Для React Native
+   const cameraRef = useRef<any>(null) 
    const { addTransaction } = useTransactions()
 
    useEffect(() => {
       if (isWeb) {
-         // Для Web запрашиваем доступ к камере
          navigator.mediaDevices
             .getUserMedia({ video: true })
             .then(() => setCameraPermission(true))
             .catch(() => setCameraPermission(false))
       } else {
-         // Для React Native запрашиваем доступ к камере
          const requestCameraPermission = async () => {
             const { Camera, CameraPermissionStatus } = require('react-native-vision-camera')
             const permission = await Camera.requestCameraPermission()
@@ -50,7 +47,6 @@ const AddTransaction: React.FC = () => {
       }
    }, [])
 
-   // Обработчик захвата фото для Web
    const capturePhotoWeb = async () => {
       if (!cameraPermission) {
          Alert.alert('Camera Permission', 'Camera permission is required.')
@@ -72,13 +68,11 @@ const AddTransaction: React.FC = () => {
       const context = canvas.getContext('2d')
       context?.drawImage(video, 0, 0)
 
-      // Получаем изображение в формате base64 (Data URL)
       const dataUrl = canvas.toDataURL()
       setReceiptImage(dataUrl)
-      stream.getTracks().forEach((track) => track.stop()) // Останавливаем камеру после съемки
+      stream.getTracks().forEach((track) => track.stop()) 
    }
 
-   // Обработчик захвата фото для React Native
    const capturePhotoNative = async () => {
       if (!cameraPermission) {
          Alert.alert('Camera Permission', 'Camera permission is required.')
@@ -87,37 +81,34 @@ const AddTransaction: React.FC = () => {
 
       try {
          const photo = await cameraRef.current.takePhoto({
-            qualityPrioritization: 'quality', // Вы можете настроить качество снимка
-            skipMetadata: true,  // Если метаданные не нужны
+            qualityPrioritization: 'quality', 
+            skipMetadata: true, 
          })
-         setReceiptImage(photo.uri) // Сохраняем URI фото в состояние
+         setReceiptImage(photo.uri) 
       } catch (error) {
          Alert.alert('Error', 'Failed to take photo.')
       }
    }
 
-   // Обработчик добавления транзакции
    const handleAddTransaction = async () => {
       if (!title.trim() || !amount.trim()) {
          Alert.alert('Error', 'Please fill in both fields.')
          return
       }
 
-      // Создаем объект транзакции с добавленной фотографией
       const transaction = {
          id: Date.now(),
          title,
          amount: parseFloat(amount),
          date: new Date().toISOString(),
-         receipt: receiptImage,  // Добавляем изображение чека в транзакцию
+         receipt: receiptImage, 
       }
 
       await addTransaction(transaction)
 
-      // Очищаем поля после добавления транзакции
       setTitle('')
       setAmount('')
-      setReceiptImage(null) // Очищаем изображение
+      setReceiptImage(null) 
       Alert.alert('Success', 'Transaction added!')
    }
 
@@ -140,10 +131,8 @@ const AddTransaction: React.FC = () => {
             onChangeText={setAmount}
          />
 
-         {/* Показываем фотографию чека над кнопкой Take Photo */}
          {receiptImage && <Image source={{ uri: receiptImage }} style={styles.receiptImage} />}
 
-         {/* Камера для захвата фото */}
          {isWeb ? (
             cameraPermission && (
                <View style={styles.webCameraContainer}>
@@ -197,7 +186,7 @@ const styles = StyleSheet.create({
       width: 200,
       height: 200,
       resizeMode: 'contain',
-      marginBottom: 16,  // Убираем отступ снизу
+      marginBottom: 16,  
    },
    cameraContainer: {
       flex: 1,
@@ -212,7 +201,7 @@ const styles = StyleSheet.create({
    camera: {
       width: '50%',
       height: 300,
-      marginBottom: 16, // Убираем отступ снизу, если нужно
+      marginBottom: 16, 
    },
 })
 

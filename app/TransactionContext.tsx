@@ -31,7 +31,6 @@ const TransactionContext = createContext<TransactionContextType | undefined>(
    undefined
 )
 
-// Хук для использования контекста в компонентах
 export const useTransactions = (): TransactionContextType => {
    const context = useContext(TransactionContext)
    if (!context) {
@@ -40,7 +39,6 @@ export const useTransactions = (): TransactionContextType => {
    return context
 }
 
-// Провайдер контекста для транзакций
 export const TransactionProvider: React.FC<TransactionProviderProps> = ({
    children,
 }) => {

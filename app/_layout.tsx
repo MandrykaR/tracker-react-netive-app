@@ -1,20 +1,30 @@
-import React from 'react'
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
-import { useColorScheme } from 'react-native'
-import HomeScreen from './index'
-import AddTransaction from './AddTransaction'
-import ReportsScreen from './ReportsScreen'
-import AnalyticsScreen from './AnalyticsScreen'
-import { TransactionProvider } from './TransactionContext'
+import React from 'react';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { useColorScheme } from 'react-native';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus'; 
+import HomeScreen from './index';
+import AddTransaction from './AddTransaction';
+import ReportsScreen from './ReportsScreen';
+import AnalyticsScreen from './AnalyticsScreen';
+import { TransactionProvider } from './TransactionContext';
+import OfflineScreen from './OfflineScreen';
 
-const Tab = createMaterialTopTabNavigator()
+const Tab = createMaterialTopTabNavigator();
 
 export default function Layout() {
-   const colorScheme = useColorScheme()
-   const isDarkMode = colorScheme === 'dark'
+   const colorScheme = useColorScheme();
+   const isDarkMode = colorScheme === 'dark';
+   const isOnline = useNetworkStatus();
+
+   const handleRetry = () => {
+      window.location.reload();
+   };
+
+   if (!isOnline) {
+      return <OfflineScreen onRetry={handleRetry} />;
+   }
 
    return (
-      // Навигационный контейнер должен быть только в главном компоненте, а не внутри Layout.
       <TransactionProvider>
          <Tab.Navigator
             screenOptions={{
@@ -60,5 +70,5 @@ export default function Layout() {
             />
          </Tab.Navigator>
       </TransactionProvider>
-   )
+   );
 }
