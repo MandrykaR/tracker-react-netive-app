@@ -7,21 +7,12 @@
 		"packagerOpts": {
 			"minify": false
 		},
-		"doctor": {
-			"reactNativeDirectoryCheck": {
-				"exclude": [
-					"react-native-vision-camera",
-					"expo-modules-autolinking",
-					"react-native-chart-kit"
-				]
-			}
-		},
 		"orientation": "portrait",
-		"icon": "./assets/images/money.png",
+		"icon": "./public/assets/images/money.png",
 		"scheme": ["tracker"],
 		"userInterfaceStyle": "automatic",
 		"splash": {
-			"image": "./assets/images/card.png",
+			"image": "./public/assets/images/card.png",
 			"resizeMode": "contain",
 			"backgroundColor": "#ffffff"
 		},
@@ -37,7 +28,7 @@
 				"description": "An app for tracking transactions",
 				"icons": [
 					{
-						"src": "./public/assets/images/logo-192px.png",
+						"src": "./public/assets/images/",
 						"sizes": "192x192",
 						"type": "image/png"
 					},
