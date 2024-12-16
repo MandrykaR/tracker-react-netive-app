@@ -51,7 +51,6 @@ self.addEventListener('fetch', event => {
 				}
 				return fetch(event.request)
 					.then(response => {
-						// Кэшируем новый ресурс
 						return caches.open(CACHE_NAME).then(cache => {
 							cache.put(event.request, response.clone())
 							return response
