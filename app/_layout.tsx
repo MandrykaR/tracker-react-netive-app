@@ -1,7 +1,12 @@
 import React from 'react'
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
+import {
+	createMaterialTopTabNavigator,
+	MaterialTopTabNavigationOptions,
+} from '@react-navigation/material-top-tabs'
 import { useColorScheme } from 'react-native'
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
+import { Colors } from '@/constants/Colors'
+import { handleRetry } from '@/utils/handleRetry'
 import HomeScreen from './index'
 import AddTransaction from './AddTransaction'
 import ReportsScreen from './ReportsScreen'
@@ -17,8 +22,22 @@ export default function Layout() {
 	const isDarkMode = colorScheme === 'dark'
 	const isOnline = useNetworkStatus()
 
-	const handleRetry = () => {
-		window.location.reload()
+	const tabStyles: MaterialTopTabNavigationOptions = {
+		tabBarStyle: {
+			backgroundColor: isDarkMode
+				? Colors.dark.tabBarBackground
+				: Colors.light.tabBarBackground,
+		},
+		tabBarIndicatorStyle: {
+			backgroundColor: isDarkMode
+				? Colors.dark.tabBarIndicator
+				: Colors.light.tabBarIndicator,
+		},
+		tabBarLabelStyle: {
+			color: isDarkMode ? Colors.dark.tabBarLabel : Colors.light.tabBarLabel,
+			fontWeight: 'bold',
+			fontSize: 18,
+		},
 	}
 
 	if (!isOnline) {
@@ -27,21 +46,7 @@ export default function Layout() {
 
 	return (
 		<TransactionProvider>
-			<Tab.Navigator
-				screenOptions={{
-					tabBarStyle: {
-						backgroundColor: isDarkMode ? '#1D3D47' : '#A1CEDC',
-					},
-					tabBarIndicatorStyle: {
-						backgroundColor: isDarkMode ? '#fff' : '#000',
-					},
-					tabBarLabelStyle: {
-						color: isDarkMode ? '#FFF' : '#000',
-						fontWeight: 'bold',
-						fontSize: 18,
-					},
-				}}
-			>
+			<Tab.Navigator screenOptions={tabStyles}>
 				<Tab.Screen
 					name='index'
 					component={HomeScreen}
