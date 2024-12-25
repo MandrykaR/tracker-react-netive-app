@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import {
 	View,
 	Text,
@@ -30,9 +30,35 @@ const AddTransaction: React.FC = () => {
 		capturePhotoNative,
 	} = useCamera()
 
-	const [cameraFacing, setCameraFacing] = useState<'back' | 'front'>('back') // For toggling the camera facing
-
 	const device = availableDevices?.[0]
+
+	const [webFacingMode, setWebFacingMode] = useState<'user' | 'environment'>(
+		'user'
+	)
+	const videoRef = useRef<HTMLVideoElement>(null)
+
+	const toggleWebCameraFacing = async () => {
+		const newFacingMode = webFacingMode === 'user' ? 'environment' : 'user'
+		setWebFacingMode(newFacingMode)
+
+		// Stop the current video stream
+		if (videoRef.current?.srcObject) {
+			const tracks = (videoRef.current.srcObject as MediaStream).getTracks()
+			tracks.forEach(track => track.stop())
+		}
+
+		// Restart with the new facing mode
+		try {
+			const stream = await navigator.mediaDevices.getUserMedia({
+				video: { facingMode: newFacingMode },
+			})
+			if (videoRef.current) {
+				videoRef.current.srcObject = stream
+			}
+		} catch (error) {
+			Alert.alert('Error', 'Unable to switch the camera.')
+		}
+	}
 
 	const handleAddTransaction = async () => {
 		if (!title.trim() || !amount.trim()) {
@@ -53,11 +79,6 @@ const AddTransaction: React.FC = () => {
 		setTitle('')
 		setAmount('')
 		Alert.alert('Success', 'Transaction added!')
-	}
-
-	// Toggle camera facing direction
-	const toggleCameraFacing = () => {
-		setCameraFacing(prev => (prev === 'back' ? 'front' : 'back'))
 	}
 
 	return (
@@ -105,21 +126,36 @@ const AddTransaction: React.FC = () => {
 			{Platform.OS === 'web'
 				? cameraPermission && (
 						<View style={styles.webCameraContainer}>
-							<video id='web-camera' autoPlay muted width='50%' height='100' />
+							<video
+								id='web-camera'
+								ref={videoRef}
+								autoPlay
+								muted
+								width='50%'
+								height='100'
+							/>
 							<Button
 								title='Take Photo (Web)'
 								onPress={capturePhotoWeb}
 								color='#4CAF50'
 							/>
+							<TouchableOpacity
+								style={styles.toggleButton}
+								onPress={toggleWebCameraFacing}
+							>
+								<Text style={styles.toggleButtonText}>Flip Camera</Text>
+							</TouchableOpacity>
 						</View>
 				  )
 				: cameraPermission &&
 				  device && (
 						<View style={styles.cameraContainer}>
-							<CameraView style={styles.camera} facing={cameraFacing}>
+							<CameraView style={styles.camera} facing='back'>
 								<TouchableOpacity
 									style={styles.toggleButton}
-									onPress={toggleCameraFacing}
+									onPress={() =>
+										Alert.alert('Switch Camera is unavailable for native yet.')
+									}
 								>
 									<Text style={styles.toggleButtonText}>Flip Camera</Text>
 								</TouchableOpacity>
@@ -176,16 +212,15 @@ const styles = StyleSheet.create({
 		marginBottom: 16,
 	},
 	toggleButton: {
-		position: 'absolute',
-		bottom: 20,
 		alignSelf: 'center',
-		backgroundColor: '#4CAF50',
 		padding: 10,
+		backgroundColor: '#007BFF',
 		borderRadius: 5,
+		marginTop: 10,
 	},
 	toggleButtonText: {
-		color: '#fff',
-		fontWeight: 'bold',
+		color: 'white',
+		fontSize: 16,
 	},
 })
 
