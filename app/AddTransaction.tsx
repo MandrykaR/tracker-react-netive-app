@@ -11,8 +11,6 @@ import {
 	Platform,
 	TouchableOpacity,
 } from 'react-native'
-import { useCamera } from '../hooks/useCamera'
-import { CameraView } from 'expo-camera'
 import { useTransactions } from './TransactionContext'
 
 const AddTransaction: React.FC = () => {
@@ -20,22 +18,24 @@ const AddTransaction: React.FC = () => {
 	const isDarkMode = colorScheme === 'dark'
 	const [title, setTitle] = useState<string>('')
 	const [amount, setAmount] = useState<string>('')
+	const [receiptImage, setReceiptImage] = useState<string | null>(null)
 	const { addTransaction } = useTransactions()
 
-	const {
-		cameraPermission,
-		receiptImage,
-		availableDevices,
-		capturePhotoWeb,
-		capturePhotoNative,
-	} = useCamera()
-
-	const device = availableDevices?.[0]
-
+	const [cameraPermission, setCameraPermission] = useState<boolean>(false)
 	const [webFacingMode, setWebFacingMode] = useState<'user' | 'environment'>(
 		'user'
 	)
 	const videoRef = useRef<HTMLVideoElement>(null)
+
+	// Request camera permissions when the component mounts
+	React.useEffect(() => {
+		if (Platform.OS === 'web') {
+			navigator.mediaDevices
+				.getUserMedia({ video: true })
+				.then(() => setCameraPermission(true))
+				.catch(() => setCameraPermission(false))
+		}
+	}, [])
 
 	const toggleWebCameraFacing = async () => {
 		const newFacingMode = webFacingMode === 'user' ? 'environment' : 'user'
@@ -60,6 +60,32 @@ const AddTransaction: React.FC = () => {
 		}
 	}
 
+	const capturePhotoWeb = async () => {
+		if (!videoRef.current) {
+			Alert.alert('Error', 'Video stream is not available.')
+			return
+		}
+
+		// Create a canvas to capture the current video frame
+		const canvas = document.createElement('canvas')
+		const context = canvas.getContext('2d')
+		if (!context) {
+			Alert.alert('Error', 'Unable to capture photo.')
+			return
+		}
+
+		canvas.width = videoRef.current.videoWidth
+		canvas.height = videoRef.current.videoHeight
+
+		// Draw the current video frame onto the canvas
+		context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height)
+
+		// Get the image as a data URL
+		const dataUrl = canvas.toDataURL('image/jpeg')
+		setReceiptImage(dataUrl)
+		Alert.alert('Success', 'Photo captured!')
+	}
+
 	const handleAddTransaction = async () => {
 		if (!title.trim() || !amount.trim()) {
 			Alert.alert('Error', 'Please fill in both fields.')
@@ -78,6 +104,7 @@ const AddTransaction: React.FC = () => {
 
 		setTitle('')
 		setAmount('')
+		setReceiptImage(null)
 		Alert.alert('Success', 'Transaction added!')
 	}
 
@@ -147,24 +174,9 @@ const AddTransaction: React.FC = () => {
 							</TouchableOpacity>
 						</View>
 				  )
-				: cameraPermission &&
-				  device && (
-						<View style={styles.cameraContainer}>
-							<CameraView style={styles.camera} facing='back'>
-								<TouchableOpacity
-									style={styles.toggleButton}
-									onPress={() =>
-										Alert.alert('Switch Camera is unavailable for native yet.')
-									}
-								>
-									<Text style={styles.toggleButtonText}>Flip Camera</Text>
-								</TouchableOpacity>
-								<Button
-									title='Take Photo (React Native)'
-									onPress={capturePhotoNative}
-									color='#4CAF50'
-								/>
-							</CameraView>
+				: cameraPermission && (
+						<View style={styles.nativeCameraContainer}>
+							<Text>Native camera functionality goes here.</Text>
 						</View>
 				  )}
 
@@ -196,19 +208,14 @@ const styles = StyleSheet.create({
 		resizeMode: 'contain',
 		marginBottom: 16,
 	},
-	cameraContainer: {
-		flex: 1,
-		justifyContent: 'center',
-		marginBottom: 16,
-	},
 	webCameraContainer: {
 		flex: 1,
 		justifyContent: 'center',
 		marginBottom: 16,
 	},
-	camera: {
-		width: '50%',
-		height: 300,
+	nativeCameraContainer: {
+		flex: 1,
+		justifyContent: 'center',
 		marginBottom: 16,
 	},
 	toggleButton: {
