@@ -9,8 +9,9 @@ import {
 	useColorScheme,
 	Image,
 	Platform,
+	TouchableOpacity,
 } from 'react-native'
-import { useCamera } from '../hooks/useCamera' // Import the custom hook
+import { useCamera } from '../hooks/useCamera'
 import { CameraView } from 'expo-camera'
 import { useTransactions } from './TransactionContext'
 
@@ -21,20 +22,18 @@ const AddTransaction: React.FC = () => {
 	const [amount, setAmount] = useState<string>('')
 	const { addTransaction } = useTransactions()
 
-	// Get the camera data from the custom hook
 	const {
 		cameraPermission,
 		receiptImage,
-		cameraRef,
 		availableDevices,
 		capturePhotoWeb,
 		capturePhotoNative,
 	} = useCamera()
 
-	// Select the first available camera device (back or front)
-	const device = availableDevices?.[0] // You can modify this to choose a specific camera if needed (e.g., [1] for front)
+	const [cameraFacing, setCameraFacing] = useState<'back' | 'front'>('back') // For toggling the camera facing
 
-	// Handle adding the transaction
+	const device = availableDevices?.[0]
+
 	const handleAddTransaction = async () => {
 		if (!title.trim() || !amount.trim()) {
 			Alert.alert('Error', 'Please fill in both fields.')
@@ -54,6 +53,11 @@ const AddTransaction: React.FC = () => {
 		setTitle('')
 		setAmount('')
 		Alert.alert('Success', 'Transaction added!')
+	}
+
+	// Toggle camera facing direction
+	const toggleCameraFacing = () => {
+		setCameraFacing(prev => (prev === 'back' ? 'front' : 'back'))
 	}
 
 	return (
@@ -112,10 +116,13 @@ const AddTransaction: React.FC = () => {
 				: cameraPermission &&
 				  device && (
 						<View style={styles.cameraContainer}>
-							<CameraView
-								style={styles.camera}
-								facing='back' // Assuming you want the back camera, can toggle if needed
-							>
+							<CameraView style={styles.camera} facing={cameraFacing}>
+								<TouchableOpacity
+									style={styles.toggleButton}
+									onPress={toggleCameraFacing}
+								>
+									<Text style={styles.toggleButtonText}>Flip Camera</Text>
+								</TouchableOpacity>
 								<Button
 									title='Take Photo (React Native)'
 									onPress={capturePhotoNative}
@@ -167,6 +174,18 @@ const styles = StyleSheet.create({
 		width: '50%',
 		height: 300,
 		marginBottom: 16,
+	},
+	toggleButton: {
+		position: 'absolute',
+		bottom: 20,
+		alignSelf: 'center',
+		backgroundColor: '#4CAF50',
+		padding: 10,
+		borderRadius: 5,
+	},
+	toggleButtonText: {
+		color: '#fff',
+		fontWeight: 'bold',
 	},
 })
 
