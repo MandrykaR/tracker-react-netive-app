@@ -57,6 +57,7 @@ const AddTransaction: React.FC = () => {
 		const newFacingMode = webFacingMode === 'user' ? 'environment' : 'user'
 		setWebFacingMode(newFacingMode)
 
+		// Stop the current video stream
 		if (videoRef.current?.srcObject) {
 			const tracks = (videoRef.current.srcObject as MediaStream).getTracks()
 			tracks.forEach(track => track.stop())
@@ -247,17 +248,6 @@ const styles = StyleSheet.create({
 	toggleButtonText: {
 		color: '#fff',
 		textAlign: 'center',
-	},
-	buttonContainer: {
-		width: '100%',
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		alignItems: 'center',
-		marginTop: 16,
-	},
-	button: {
-		flex: 1,
-		marginHorizontal: 8,
 	},
 })
 
