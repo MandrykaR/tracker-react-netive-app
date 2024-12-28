@@ -31,10 +31,10 @@ const AddTransaction: React.FC = () => {
 
 	const {
 		cameraPermission: nativeCameraPermission,
-		receiptImage,
+		receiptImage, // Используем receiptImage из хука useCamera
 		availableDevices,
-		capturePhotoWeb,
-		capturePhotoNative,
+		capturePhotoWeb, // Функция для захвата фото в вебе
+		capturePhotoNative, // Функция для захвата фото на мобильных устройствах
 	}: UseCameraReturn = useCamera()
 
 	const [cameraPermission, setCameraPermission] = useState<boolean>(false)
@@ -76,7 +76,7 @@ const AddTransaction: React.FC = () => {
 			title,
 			amount,
 			date: new Date().toISOString(),
-			receipt: receiptImage,
+			receipt: receiptImage, // Используем receiptImage из хука
 		}
 
 		await addTransaction(transaction)
@@ -87,6 +87,10 @@ const AddTransaction: React.FC = () => {
 	}
 
 	const buttonColor = colorScheme === 'dark' ? '#32CD32' : currentColors.tint
+
+	const toggleCameraFacing = () => {
+		setCameraFacing(cameraFacing === 'back' ? 'front' : 'back')
+	}
 
 	return (
 		<View
@@ -125,6 +129,7 @@ const AddTransaction: React.FC = () => {
 				<Image source={{ uri: receiptImage }} style={styles.receiptImage} />
 			)}
 
+			{/* Камера для веба */}
 			{Platform.OS === 'web' ? (
 				cameraPermission && (
 					<View style={styles.webCameraContainer}>
@@ -141,6 +146,13 @@ const AddTransaction: React.FC = () => {
 							onPress={capturePhotoWeb}
 							color={buttonColor}
 						/>
+						{/* Переключение камеры для веба */}
+						<TouchableOpacity
+							style={styles.toggleButton}
+							onPress={toggleCameraFacing}
+						>
+							<Text style={styles.toggleButtonText}>Flip Camera</Text>
+						</TouchableOpacity>
 					</View>
 				)
 			) : nativeCameraPermission && device ? (
@@ -152,11 +164,10 @@ const AddTransaction: React.FC = () => {
 							color={buttonColor}
 						/>
 					</CameraView>
+					{/* Переключение камеры для мобильных устройств */}
 					<TouchableOpacity
 						style={styles.toggleButton}
-						onPress={() =>
-							setCameraFacing(cameraFacing === 'back' ? 'front' : 'back')
-						}
+						onPress={toggleCameraFacing}
 					>
 						<Text style={styles.toggleButtonText}>Flip Camera</Text>
 					</TouchableOpacity>
