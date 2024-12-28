@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
 	View,
 	Text,
@@ -8,6 +8,8 @@ import {
 	Image,
 	Platform,
 	useColorScheme,
+	TouchableOpacity,
+	Alert,
 } from 'react-native'
 import { CameraView } from 'expo-camera'
 
@@ -27,14 +29,50 @@ const AddTransaction: React.FC = () => {
 	const { addTransaction } = useTransactions()
 
 	const {
-		cameraPermission,
+		cameraPermission: nativeCameraPermission,
 		receiptImage,
 		availableDevices,
 		capturePhotoWeb,
 		capturePhotoNative,
 	}: UseCameraReturn = useCamera()
 
+	const [cameraPermission, setCameraPermission] = useState<boolean>(false)
+	const [webFacingMode, setWebFacingMode] = useState<'user' | 'environment'>(
+		'user'
+	)
+	const videoRef = useRef<HTMLVideoElement>(null)
+
 	const device = availableDevices?.[0]
+
+	useEffect(() => {
+		if (Platform.OS === 'web') {
+			navigator.mediaDevices
+				.getUserMedia({ video: true })
+				.then(() => setCameraPermission(true))
+				.catch(() => setCameraPermission(false))
+		}
+	}, [])
+
+	const toggleWebCameraFacing = async () => {
+		const newFacingMode = webFacingMode === 'user' ? 'environment' : 'user'
+		setWebFacingMode(newFacingMode)
+
+		if (videoRef.current?.srcObject) {
+			const tracks = (videoRef.current.srcObject as MediaStream).getTracks()
+			tracks.forEach(track => track.stop())
+		}
+
+		try {
+			const stream = await navigator.mediaDevices.getUserMedia({
+				video: { facingMode: newFacingMode },
+			})
+			if (videoRef.current) {
+				videoRef.current.srcObject = stream
+			}
+		} catch (error) {
+			Alert.alert('Error', 'Unable to switch the camera.')
+		}
+	}
 
 	const handleAmountChange = (value: string): void => {
 		const numericValue = parseFloat(value)
@@ -82,17 +120,13 @@ const AddTransaction: React.FC = () => {
 				message={modalMessage}
 				onClose={() => setModalVisible(false)}
 			/>
-
 			<Text style={[styles.title, { color: currentColors.text }]}>
 				Add Transaction
 			</Text>
 			<TextInput
 				style={[
 					styles.input,
-					{
-						color: currentColors.text,
-						borderColor: currentColors.text,
-					},
+					{ color: currentColors.text, borderColor: currentColors.text },
 				]}
 				placeholder='Title'
 				placeholderTextColor={colorScheme === 'dark' ? '#bbb' : '#666'}
@@ -102,10 +136,7 @@ const AddTransaction: React.FC = () => {
 			<TextInput
 				style={[
 					styles.input,
-					{
-						color: currentColors.text,
-						borderColor: currentColors.text,
-					},
+					{ color: currentColors.text, borderColor: currentColors.text },
 				]}
 				placeholder='Amount'
 				placeholderTextColor={colorScheme === 'dark' ? '#bbb' : '#666'}
@@ -113,7 +144,6 @@ const AddTransaction: React.FC = () => {
 				value={amount === '' ? '' : amount.toString()}
 				onChangeText={handleAmountChange}
 			/>
-
 			{receiptImage && (
 				<Image source={{ uri: receiptImage }} style={styles.receiptImage} />
 			)}
@@ -121,15 +151,28 @@ const AddTransaction: React.FC = () => {
 			{Platform.OS === 'web' ? (
 				cameraPermission && (
 					<View style={styles.webCameraContainer}>
-						<video id='web-camera' autoPlay muted width='50%' height='100' />
+						<video
+							id='web-camera'
+							ref={videoRef}
+							autoPlay
+							muted
+							width='50%'
+							height='100'
+						/>
 						<Button
 							title='Take Photo (Web)'
 							onPress={capturePhotoWeb}
 							color={buttonColor}
 						/>
+						<TouchableOpacity
+							style={styles.toggleButton}
+							onPress={toggleWebCameraFacing}
+						>
+							<Text style={styles.toggleButtonText}>Flip Camera</Text>
+						</TouchableOpacity>
 					</View>
 				)
-			) : cameraPermission && device ? (
+			) : nativeCameraPermission && device ? (
 				<View style={styles.cameraContainer}>
 					<CameraView style={styles.camera} facing='back'>
 						<Button
@@ -194,6 +237,16 @@ const styles = StyleSheet.create({
 		maxWidth: 400,
 		height: 300,
 		marginBottom: 16,
+	},
+	toggleButton: {
+		marginTop: 10,
+		backgroundColor: '#4CAF50',
+		padding: 10,
+		borderRadius: 5,
+	},
+	toggleButtonText: {
+		color: '#fff',
+		textAlign: 'center',
 	},
 	buttonContainer: {
 		width: '100%',
