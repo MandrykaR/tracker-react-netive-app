@@ -31,16 +31,13 @@ const AddTransaction: React.FC = () => {
 
 	const {
 		cameraPermission: nativeCameraPermission,
-		receiptImage,
+		receiptImage, // Используем receiptImage из хука useCamera
 		availableDevices,
-		capturePhotoWeb,
-		capturePhotoNative,
+		capturePhotoWeb, // Функция для захвата фото в вебе
+		capturePhotoNative, // Функция для захвата фото на мобильных устройствах
 	}: UseCameraReturn = useCamera()
 
 	const [cameraPermission, setCameraPermission] = useState<boolean>(false)
-	const [webFacingMode, setWebFacingMode] = useState<'user' | 'environment'>(
-		'user'
-	)
 	const videoRef = useRef<HTMLVideoElement>(null)
 
 	const device = availableDevices?.[0]
@@ -53,34 +50,6 @@ const AddTransaction: React.FC = () => {
 				.catch(() => setCameraPermission(false))
 		}
 	}, [])
-
-	const toggleCameraFacing = () => {
-		if (Platform.OS === 'web') {
-			const newFacingMode = webFacingMode === 'user' ? 'environment' : 'user'
-			setWebFacingMode(newFacingMode)
-			startWebCamera(newFacingMode)
-		} else {
-			setCameraFacing(cameraFacing === 'back' ? 'front' : 'back')
-		}
-	}
-
-	const startWebCamera = async (facingMode: 'user' | 'environment') => {
-		if (videoRef.current?.srcObject) {
-			const tracks = (videoRef.current.srcObject as MediaStream).getTracks()
-			tracks.forEach(track => track.stop())
-		}
-
-		try {
-			const stream = await navigator.mediaDevices.getUserMedia({
-				video: { facingMode },
-			})
-			if (videoRef.current) {
-				videoRef.current.srcObject = stream
-			}
-		} catch (error) {
-			Alert.alert('Error', 'Unable to switch the camera.')
-		}
-	}
 
 	const handleAmountChange = (value: string): void => {
 		const numericValue = parseFloat(value)
@@ -107,7 +76,7 @@ const AddTransaction: React.FC = () => {
 			title,
 			amount,
 			date: new Date().toISOString(),
-			receipt: receiptImage,
+			receipt: receiptImage, // Используем receiptImage из хука
 		}
 
 		await addTransaction(transaction)
@@ -165,19 +134,13 @@ const AddTransaction: React.FC = () => {
 							autoPlay
 							muted
 							width='50%'
-							height='100'
+							height='100%'
 						/>
 						<Button
 							title='Take Photo (Web)'
-							onPress={capturePhotoWeb}
+							onPress={capturePhotoWeb} // Функция для веб-захвата фото
 							color={buttonColor}
 						/>
-						<TouchableOpacity
-							style={styles.toggleButton}
-							onPress={toggleCameraFacing}
-						>
-							<Text style={styles.toggleButtonText}>Flip Camera</Text>
-						</TouchableOpacity>
 					</View>
 				)
 			) : nativeCameraPermission && device ? (
@@ -185,16 +148,10 @@ const AddTransaction: React.FC = () => {
 					<CameraView style={styles.camera} facing={cameraFacing}>
 						<Button
 							title='Take Photo (React Native)'
-							onPress={capturePhotoNative}
+							onPress={capturePhotoNative} // Функция для мобильного захвата фото
 							color={buttonColor}
 						/>
 					</CameraView>
-					<TouchableOpacity
-						style={styles.toggleButton}
-						onPress={toggleCameraFacing}
-					>
-						<Text style={styles.toggleButtonText}>Flip Camera</Text>
-					</TouchableOpacity>
 				</View>
 			) : null}
 
@@ -259,8 +216,8 @@ const styles = StyleSheet.create({
 		borderRadius: 5,
 	},
 	toggleButtonText: {
-		color: '#fff',
-		textAlign: 'center',
+		color: 'white',
+		fontSize: 14,
 	},
 })
 
