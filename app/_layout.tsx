@@ -1,23 +1,25 @@
 import React from 'react'
+
 import {
 	createMaterialTopTabNavigator,
 	MaterialTopTabNavigationOptions,
 } from '@react-navigation/material-top-tabs'
+
 import { useColorScheme } from 'react-native'
+
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 import { Colors } from '@/constants/Colors'
 import { handleRetry } from '@/utils/handleRetry'
+
 import HomeScreen from './index'
 import AddTransaction from './AddTransaction'
-import ReportsScreen from './ReportsScreen'
 import AnalyticsScreen from './AnalyticsScreen'
 import TransactionProvider from './TransactionContext'
-
 import OfflineScreen from './OfflineScreen'
 
 const Tab = createMaterialTopTabNavigator()
 
-export default function Layout() {
+export default function Layout(): JSX.Element {
 	const colorScheme = useColorScheme()
 	const isDarkMode = colorScheme === 'dark'
 	const isOnline = useNetworkStatus()
@@ -60,13 +62,6 @@ export default function Layout() {
 					component={AddTransaction}
 					options={{
 						tabBarLabel: 'Transaction',
-					}}
-				/>
-				<Tab.Screen
-					name='ReportsScreen'
-					component={ReportsScreen}
-					options={{
-						tabBarLabel: 'Reports',
 					}}
 				/>
 				<Tab.Screen

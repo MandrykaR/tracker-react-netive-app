@@ -1,64 +1,63 @@
 {
-  "expo": {
-    "name": "Tracker",
-    "slug": "Tracker",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
-    "version": "1.0.0",
-    "packagerOpts": {
-      "minify": false
-    },
-    "orientation": "portrait",
-    "icon": "./public/assets/images/money.png",
-    "scheme": [
-      "tracker"
-    ],
-    "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./public/assets/images/card.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "web": {
-      "favicon": "./public/assets/images/favicon.png",
-      "manifest": {
-        "name": "Tracker React Native App",
-        "short_name": "TrackerApp",
-        "start_url": ".",
-        "display": "standalone",
-        "background_color": "#ffffff",
-        "theme_color": "#000000",
-        "description": "An app for tracking transactions",
-        "icons": [
-          {
-            "src": "./public/assets/images/",
-            "sizes": "192x192",
-            "type": "image/png"
-          },
-          {
-            "src": "./assets/images/512px logo.png",
-            "sizes": "512x512",
-            "type": "image/png"
-          }
-        ]
-      },
-      "serviceWorker": {
-        "src": "service-worker.js"
-      },
-      "output": "static"
-    },
-    "plugins": [
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
-        }
-      ],
-      "expo-font",
-      "expo-router"
-    ]
-  }
+	"expo": {
+		"name": "Tracker",
+		"slug": "Tracker",
+		"platforms": ["ios", "android", "web"],
+		"version": "1.0.0",
+		"packagerOpts": {
+			"minify": false
+		},
+		"orientation": "portrait",
+		"icon": "./public/assets/images/money.png",
+		"scheme": ["tracker"],
+		"userInterfaceStyle": "automatic",
+		"splash": {
+			"image": "./public/assets/images/card.png",
+			"resizeMode": "contain",
+			"backgroundColor": "#ffffff"
+		},
+		"web": {
+			"favicon": "./assets/images/favicon.png",
+			"manifest": {
+				"name": "Tracker React Native App",
+				"short_name": "TrackerApp",
+				"start_url": ".",
+				"display": "standalone",
+				"background_color": "#ffffff",
+				"theme_color": "#000000",
+				"description": "An app for tracking transactions",
+				"icons": [
+					{
+						"src": "./assets/images/logo-192px.png",
+						"sizes": "192x192",
+						"type": "image/png"
+					},
+					{
+						"src": "./assets/images/android-chrome-512x512.png",
+						"sizes": "512x512",
+						"type": "image/png"
+					},
+					{
+						"src": "./assets/images/apple-touch-icon.png",
+						"sizes": "180x180",
+						"type": "image/png"
+					}
+				]
+			},
+			"serviceWorker": {
+				"src": "service-worker.js"
+			},
+			"output": "static"
+		},
+		"plugins": [
+			[
+				"expo-camera",
+				{
+					"cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
+				}
+			],
+			"expo-font",
+			"expo-router"
+		]
+	}
 }

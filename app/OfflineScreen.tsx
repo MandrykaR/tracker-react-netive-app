@@ -1,26 +1,53 @@
-import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import React from 'react'
+import { View, Text, Button, StyleSheet, useColorScheme } from 'react-native'
+import { Colors } from '../constants/Colors'
 
-const OfflineScreen = ({ onRetry }: { onRetry: () => void }) => {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.text}>You are offline</Text>
-      <Button title="Retry" onPress={onRetry} />
-    </View>
-  );
-};
+interface OfflineScreenProps {
+	onRetry: () => void
+}
+
+const OfflineScreen: React.FC<OfflineScreenProps> = ({ onRetry }) => {
+	const colorScheme = useColorScheme()
+	const isDarkMode = colorScheme === 'dark'
+
+	return (
+		<View
+			style={[
+				styles.container,
+				{
+					backgroundColor: isDarkMode
+						? Colors.dark.background
+						: Colors.light.background,
+				},
+			]}
+		>
+			<Text
+				style={[
+					styles.text,
+					{ color: isDarkMode ? Colors.dark.text : Colors.light.text },
+				]}
+			>
+				You are offline
+			</Text>
+			<Button
+				title='Retry'
+				onPress={onRetry}
+				color={isDarkMode ? Colors.light.tint : Colors.dark.tint}
+			/>
+		</View>
+	)
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
-  },
-  text: {
-    fontSize: 24,
-    marginBottom: 20,
-  },
-});
+	container: {
+		flex: 1,
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	text: {
+		fontSize: 24,
+		marginBottom: 20,
+	},
+})
 
-export default OfflineScreen;
+export default OfflineScreen

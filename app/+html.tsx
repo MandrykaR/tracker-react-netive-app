@@ -18,7 +18,11 @@ export default function Root({ children }: PropsWithChildren) {
 				<meta name='description' content='A simple financial tracker app' />
 				<meta property='og:title' content='Financial Tracker' />
 				<title>Financial Tracker</title>
-				<link rel='icon' href='/public/assets/images/favicon.ico' />
+				<link
+					rel='icon'
+					href='/assets/images/favicon.png' 
+					type='image/png'
+				/>
 				{/* Link the PWA manifest file. */}
 				<link rel='manifest' href='manifest.json' />
 				{/*

@@ -19,7 +19,7 @@ export const useCamera = () => {
 					const stream = await navigator.mediaDevices.getUserMedia({
 						video: true,
 					})
-					stream.getTracks().forEach(track => track.stop()) // Close the stream
+					stream.getTracks().forEach(track => track.stop()) 
 					setCameraPermission(true)
 				} catch (error) {
 					setCameraPermission(false)
@@ -69,7 +69,6 @@ export const useCamera = () => {
 			const dataUrl = canvas.toDataURL()
 			setReceiptImage(dataUrl)
 
-			// Stop the video stream after capturing the image
 			stream.getTracks().forEach(track => track.stop())
 		} catch (error) {
 			console.error('Error capturing photo on web:', error)
@@ -98,7 +97,7 @@ export const useCamera = () => {
 		cameraPermission,
 		receiptImage,
 		cameraRef,
-		availableDevices, // Expose available devices to be used in your component
+		availableDevices,
 		capturePhotoWeb,
 		capturePhotoNative,
 	}

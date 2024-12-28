@@ -2,7 +2,7 @@ const CACHE_NAME = 'my-app-cache-v1'
 const STATIC_FILES = [
 	'/dist/',
 	'/dist/index.html',
-	'/dist/favicon.ico',
+	'/dist/assets/images/favicon.png',
 	'/dist/manifest.json',
 	'/dist/metadata.json',
 	'/dist/_sitemap.html',
@@ -10,7 +10,6 @@ const STATIC_FILES = [
 	'/dist/AddTransaction.html',
 	'/dist/AnalyticsScreen.html',
 	'/dist/OfflineScreen.html',
-	'/dist/ReportsScreen.html',
 	'/dist/TransactionContext.html',
 	'/dist/_expo/static/js/entry-98c524306db50a5823efa7739e775bbe.js',
 ]
