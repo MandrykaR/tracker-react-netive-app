@@ -26,7 +26,7 @@ const AddTransaction: React.FC = () => {
 	const [amount, setAmount] = useState<number | ''>('')
 	const [modalVisible, setModalVisible] = useState<boolean>(false)
 	const [modalMessage, setModalMessage] = useState<string>('')
-	const [cameraFacing, setCameraFacing] = useState<'front' | 'back'>('back') // Toggle state
+	const [cameraFacing, setCameraFacing] = useState<'front' | 'back'>('back')
 	const { addTransaction } = useTransactions()
 
 	const {
@@ -39,25 +39,38 @@ const AddTransaction: React.FC = () => {
 
 	const [cameraPermission, setCameraPermission] = useState<boolean>(false)
 	const [webFacingMode, setWebFacingMode] = useState<'user' | 'environment'>(
-		'environment' // Start with back camera
+		'user'
 	)
 	const videoRef = useRef<HTMLVideoElement>(null)
 
+	const device = availableDevices?.[0]
+
 	useEffect(() => {
 		if (Platform.OS === 'web') {
-			startWebCamera(webFacingMode)
+			navigator.mediaDevices
+				.getUserMedia({ video: true })
+				.then(() => setCameraPermission(true))
+				.catch(() => setCameraPermission(false))
 		}
-	}, [webFacingMode])
+	}, [])
+
+	const toggleCameraFacing = () => {
+		if (Platform.OS === 'web') {
+			const newFacingMode = webFacingMode === 'user' ? 'environment' : 'user'
+			setWebFacingMode(newFacingMode)
+			startWebCamera(newFacingMode)
+		} else {
+			setCameraFacing(cameraFacing === 'back' ? 'front' : 'back')
+		}
+	}
 
 	const startWebCamera = async (facingMode: 'user' | 'environment') => {
-		try {
-			// Stop existing video stream
-			if (videoRef.current?.srcObject) {
-				const tracks = (videoRef.current.srcObject as MediaStream).getTracks()
-				tracks.forEach(track => track.stop())
-			}
+		if (videoRef.current?.srcObject) {
+			const tracks = (videoRef.current.srcObject as MediaStream).getTracks()
+			tracks.forEach(track => track.stop())
+		}
 
-			// Start new video stream with the specified facing mode
+		try {
 			const stream = await navigator.mediaDevices.getUserMedia({
 				video: { facingMode },
 			})
@@ -65,15 +78,7 @@ const AddTransaction: React.FC = () => {
 				videoRef.current.srcObject = stream
 			}
 		} catch (error) {
-			Alert.alert('Error', 'Unable to access the camera.')
-		}
-	}
-
-	const toggleCameraFacing = () => {
-		if (Platform.OS === 'web') {
-			setWebFacingMode(webFacingMode === 'user' ? 'environment' : 'user')
-		} else {
-			setCameraFacing(cameraFacing === 'back' ? 'front' : 'back')
+			Alert.alert('Error', 'Unable to switch the camera.')
 		}
 	}
 
@@ -171,13 +176,11 @@ const AddTransaction: React.FC = () => {
 							style={styles.toggleButton}
 							onPress={toggleCameraFacing}
 						>
-							<Text style={styles.toggleButtonText}>
-								Flip to {webFacingMode === 'user' ? 'Back' : 'Front'} Camera
-							</Text>
+							<Text style={styles.toggleButtonText}>Flip Camera</Text>
 						</TouchableOpacity>
 					</View>
 				)
-			) : nativeCameraPermission ? (
+			) : nativeCameraPermission && device ? (
 				<View style={styles.cameraContainer}>
 					<CameraView style={styles.camera} facing={cameraFacing}>
 						<Button
@@ -190,9 +193,7 @@ const AddTransaction: React.FC = () => {
 						style={styles.toggleButton}
 						onPress={toggleCameraFacing}
 					>
-						<Text style={styles.toggleButtonText}>
-							Flip to {cameraFacing === 'back' ? 'Front' : 'Back'} Camera
-						</Text>
+						<Text style={styles.toggleButtonText}>Flip Camera</Text>
 					</TouchableOpacity>
 				</View>
 			) : null}
