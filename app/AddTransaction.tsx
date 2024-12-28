@@ -31,10 +31,10 @@ const AddTransaction: React.FC = () => {
 
 	const {
 		cameraPermission: nativeCameraPermission,
-		receiptImage, // Используем receiptImage из хука useCamera
+		receiptImage,
 		availableDevices,
-		capturePhotoWeb, // Функция для захвата фото в вебе
-		capturePhotoNative, // Функция для захвата фото на мобильных устройствах
+		capturePhotoWeb,
+		capturePhotoNative,
 	}: UseCameraReturn = useCamera()
 
 	const [cameraPermission, setCameraPermission] = useState<boolean>(false)
@@ -76,7 +76,7 @@ const AddTransaction: React.FC = () => {
 			title,
 			amount,
 			date: new Date().toISOString(),
-			receipt: receiptImage, // Используем receiptImage из хука
+			receipt: receiptImage,
 		}
 
 		await addTransaction(transaction)
@@ -138,7 +138,7 @@ const AddTransaction: React.FC = () => {
 						/>
 						<Button
 							title='Take Photo (Web)'
-							onPress={capturePhotoWeb} // Функция для веб-захвата фото
+							onPress={capturePhotoWeb}
 							color={buttonColor}
 						/>
 					</View>
@@ -148,10 +148,18 @@ const AddTransaction: React.FC = () => {
 					<CameraView style={styles.camera} facing={cameraFacing}>
 						<Button
 							title='Take Photo (React Native)'
-							onPress={capturePhotoNative} // Функция для мобильного захвата фото
+							onPress={capturePhotoNative}
 							color={buttonColor}
 						/>
 					</CameraView>
+					<TouchableOpacity
+						style={styles.toggleButton}
+						onPress={() =>
+							setCameraFacing(cameraFacing === 'back' ? 'front' : 'back')
+						}
+					>
+						<Text style={styles.toggleButtonText}>Flip Camera</Text>
+					</TouchableOpacity>
 				</View>
 			) : null}
 
