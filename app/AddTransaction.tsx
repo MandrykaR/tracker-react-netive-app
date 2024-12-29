@@ -1,95 +1,57 @@
-import React, { useState, useRef } from 'react'
+import React, { useState } from 'react'
 import {
 	View,
 	Text,
 	TextInput,
-	Button,
 	StyleSheet,
-	Alert,
-	useColorScheme,
-	Image,
-	Platform,
 	TouchableOpacity,
+	Platform,
+	Image,
+	useColorScheme,
 } from 'react-native'
 import { useTransactions } from './TransactionContext'
+import { Colors } from '../constants/Colors'
+import { Dimensions } from 'react-native'
+import CustomModal from '@/components/CustomModal'
+import { useCamera } from '@/hooks/useCamera'
+
+const screenWidth = Dimensions.get('window').width
 
 const AddTransaction: React.FC = () => {
 	const colorScheme = useColorScheme()
-	const isDarkMode = colorScheme === 'dark'
+	const themeColors = Colors[colorScheme === 'dark' ? 'dark' : 'light']
+
 	const [title, setTitle] = useState<string>('')
-	const [amount, setAmount] = useState<string>('')
-	const [receiptImage, setReceiptImage] = useState<string | null>(null)
+	const [amount, setAmount] = useState<number | ''>('')
 	const { addTransaction } = useTransactions()
+	const [isModalVisible, setIsModalVisible] = useState(false)
+	const [modalMessage, setModalMessage] = useState('')
 
-	const [cameraPermission, setCameraPermission] = useState<boolean>(false)
-	const [webFacingMode, setWebFacingMode] = useState<'user' | 'environment'>(
-		'user'
-	)
-	const videoRef = useRef<HTMLVideoElement>(null)
+	const {
+		cameraPermission,
+		receiptImage,
+		videoRef,
+		capturePhotoWeb,
+		capturePhotoNative,
+		toggleWebCameraFacing,
+	} = useCamera()
 
-	React.useEffect(() => {
-		if (Platform.OS === 'web') {
-			navigator.mediaDevices
-				.getUserMedia({ video: true })
-				.then(() => setCameraPermission(true))
-				.catch(() => setCameraPermission(false))
-		}
-	}, [])
-
-	const toggleWebCameraFacing = async () => {
-		const newFacingMode = webFacingMode === 'user' ? 'environment' : 'user'
-		setWebFacingMode(newFacingMode)
-
-		if (videoRef.current?.srcObject) {
-			const tracks = (videoRef.current.srcObject as MediaStream).getTracks()
-			tracks.forEach(track => track.stop())
-		}
-
-		try {
-			const stream = await navigator.mediaDevices.getUserMedia({
-				video: { facingMode: newFacingMode },
-			})
-			if (videoRef.current) {
-				videoRef.current.srcObject = stream
-			}
-		} catch (error) {
-			Alert.alert('Error', 'Unable to switch the camera.')
-		}
-	}
-
-	const capturePhotoWeb = async () => {
-		if (!videoRef.current) {
-			Alert.alert('Error', 'Video stream is not available.')
-			return
-		}
-
-		const canvas = document.createElement('canvas')
-		const context = canvas.getContext('2d')
-		if (!context) {
-			Alert.alert('Error', 'Unable to capture photo.')
-			return
-		}
-
-		canvas.width = videoRef.current.videoWidth
-		canvas.height = videoRef.current.videoHeight
-
-		context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height)
-
-		const dataUrl = canvas.toDataURL('image/jpeg')
-		setReceiptImage(dataUrl)
-		Alert.alert('Success', 'Photo captured!')
+	const validateAmountInput = (input: string): number | '' => {
+		const sanitized = input.replace(/[^0-9.]/g, '')
+		return sanitized === '' ? '' : parseFloat(sanitized)
 	}
 
 	const handleAddTransaction = async () => {
-		if (!title.trim() || !amount.trim()) {
-			Alert.alert('Error', 'Please fill in both fields.')
+		if (!title.trim() || amount === '' || amount <= 0) {
+			setModalMessage('Please fill in both fields with valid values.')
+			setIsModalVisible(true)
 			return
 		}
 
 		const transaction = {
 			id: Date.now(),
 			title,
-			amount: parseFloat(amount),
+			amount,
 			date: new Date().toISOString(),
 			receipt: receiptImage,
 		}
@@ -98,46 +60,31 @@ const AddTransaction: React.FC = () => {
 
 		setTitle('')
 		setAmount('')
-		setReceiptImage(null)
-		Alert.alert('Success', 'Transaction added!')
+		setModalMessage('Transaction added!')
+		setIsModalVisible(true)
 	}
 
 	return (
 		<View
-			style={[
-				styles.container,
-				{ backgroundColor: isDarkMode ? '#000' : '#fff' },
-			]}
+			style={[styles.container, { backgroundColor: themeColors.background }]}
 		>
-			<Text style={[styles.title, { color: isDarkMode ? '#fff' : '#000' }]}>
+			<Text style={[styles.title, { color: themeColors.text }]}>
 				Add Transaction
 			</Text>
 			<TextInput
-				style={[
-					styles.input,
-					{
-						color: isDarkMode ? '#fff' : '#000',
-						borderColor: isDarkMode ? '#fff' : '#ccc',
-					},
-				]}
+				style={[styles.input, { color: '#000', borderColor: themeColors.icon }]}
 				placeholder='Title'
-				placeholderTextColor={isDarkMode ? '#bbb' : '#666'}
+				placeholderTextColor={themeColors.icon}
 				value={title}
 				onChangeText={setTitle}
 			/>
 			<TextInput
-				style={[
-					styles.input,
-					{
-						color: isDarkMode ? '#fff' : '#000',
-						borderColor: isDarkMode ? '#fff' : '#ccc',
-					},
-				]}
+				style={[styles.input, { color: '#000', borderColor: themeColors.icon }]}
 				placeholder='Amount'
-				placeholderTextColor={isDarkMode ? '#bbb' : '#666'}
+				placeholderTextColor={themeColors.icon}
 				keyboardType='numeric'
-				value={amount}
-				onChangeText={setAmount}
+				value={amount === '' ? '' : String(amount)}
+				onChangeText={text => setAmount(validateAmountInput(text))}
 			/>
 
 			{receiptImage && (
@@ -155,11 +102,9 @@ const AddTransaction: React.FC = () => {
 								width='50%'
 								height='100'
 							/>
-							<Button
-								title='Take Photo (Web)'
-								onPress={capturePhotoWeb}
-								color='#4CAF50'
-							/>
+							<TouchableOpacity style={styles.button} onPress={capturePhotoWeb}>
+								<Text style={styles.buttonText}>Take Photo (Web)</Text>
+							</TouchableOpacity>
 							<TouchableOpacity
 								style={styles.toggleButton}
 								onPress={toggleWebCameraFacing}
@@ -170,11 +115,24 @@ const AddTransaction: React.FC = () => {
 				  )
 				: cameraPermission && (
 						<View style={styles.nativeCameraContainer}>
-							<Text>Native camera functionality goes here.</Text>
+							<TouchableOpacity
+								style={styles.button}
+								onPress={capturePhotoNative}
+							>
+								<Text style={styles.buttonText}>Capture Photo (Native)</Text>
+							</TouchableOpacity>
 						</View>
 				  )}
 
-			<Button title='Add' onPress={handleAddTransaction} color='#4CAF50' />
+			<TouchableOpacity style={styles.button} onPress={handleAddTransaction}>
+				<Text style={styles.buttonText}>Add Transaction</Text>
+			</TouchableOpacity>
+
+			<CustomModal
+				visible={isModalVisible}
+				message={modalMessage}
+				onClose={() => setIsModalVisible(false)}
+			/>
 		</View>
 	)
 }
@@ -186,42 +144,71 @@ const styles = StyleSheet.create({
 		padding: 16,
 	},
 	title: {
-		fontSize: 24,
+		fontSize: 28,
 		fontWeight: 'bold',
 		marginBottom: 16,
+		textAlign: 'center',
 	},
 	input: {
-		height: 40,
+		height: 50,
 		borderWidth: 1,
+		borderRadius: 10,
 		marginBottom: 16,
-		paddingHorizontal: 8,
+		paddingHorizontal: 12,
+		fontSize: 16,
+		backgroundColor: '#fff',
+		color: '#000',
 	},
 	receiptImage: {
 		width: 200,
 		height: 200,
 		resizeMode: 'contain',
 		marginBottom: 16,
+		alignSelf: 'center',
+		borderRadius: 10,
+		borderWidth: 1,
+		borderColor: '#ddd',
 	},
 	webCameraContainer: {
 		flex: 1,
 		justifyContent: 'center',
 		marginBottom: 16,
+		alignItems: 'center',
 	},
 	nativeCameraContainer: {
 		flex: 1,
 		justifyContent: 'center',
 		marginBottom: 16,
+		alignItems: 'center',
 	},
 	toggleButton: {
 		alignSelf: 'center',
-		padding: 10,
+		paddingVertical: 12,
+		width: screenWidth * 0.7,
 		backgroundColor: '#007BFF',
-		borderRadius: 5,
+		borderRadius: 10,
 		marginTop: 10,
 	},
 	toggleButtonText: {
 		color: 'white',
 		fontSize: 16,
+		fontWeight: '600',
+		textAlign: 'center',
+	},
+	button: {
+		backgroundColor: '#4CAF50',
+		paddingVertical: 14,
+		width: screenWidth * 0.8,
+		borderRadius: 10,
+		alignItems: 'center',
+		alignSelf: 'center',
+		marginBottom: 16,
+	},
+	buttonText: {
+		color: 'white',
+		fontSize: 18,
+		fontWeight: '600',
+		textAlign: 'center',
 	},
 })
 
