@@ -9,15 +9,13 @@ import {
 	Platform,
 	useColorScheme,
 	TouchableOpacity,
-	Alert,
 } from 'react-native'
 import { CameraView } from 'expo-camera'
 
-import { useCamera } from '../hooks/useCamera'
 import { useTransactions } from './TransactionContext'
 import CustomModal from '../components/CustomModal'
 import { Colors } from '../constants/Colors'
-import { Transaction, UseCameraReturn } from '../types/types'
+import { Transaction } from '../types/types'
 
 const AddTransaction: React.FC = () => {
 	const colorScheme = useColorScheme()
@@ -27,47 +25,64 @@ const AddTransaction: React.FC = () => {
 	const [modalVisible, setModalVisible] = useState<boolean>(false)
 	const [modalMessage, setModalMessage] = useState<string>('')
 	const [cameraFacing, setCameraFacing] = useState<'front' | 'back'>('back')
-	const { addTransaction } = useTransactions()
+	const [photoUri, setPhotoUri] = useState<string | null>(null)
 
-	const {
-		cameraPermission: nativeCameraPermission,
-		receiptImage, // Используем receiptImage из хука useCamera
-		availableDevices,
-		capturePhotoWeb, // Функция для захвата фото в вебе
-		capturePhotoNative, // Функция для захвата фото на мобильных устройствах
-	}: UseCameraReturn = useCamera()
+	const { addTransaction } = useTransactions()
+	const videoRef = useRef<HTMLVideoElement | null>(null)
 
 	const [cameraPermission, setCameraPermission] = useState<boolean>(false)
-	const videoRef = useRef<HTMLVideoElement>(null)
-
-	const device = availableDevices?.[0]
 
 	useEffect(() => {
-		if (Platform.OS === 'web') {
-			navigator.mediaDevices
-				.getUserMedia({ video: true })
-				.then(() => setCameraPermission(true))
-				.catch(() => setCameraPermission(false))
-		}
-	}, [])
+		;(async () => {
+			if (Platform.OS === 'web') {
+				try {
+					const stream = await navigator.mediaDevices.getUserMedia({
+						video: { facingMode: cameraFacing },
+					})
+					if (videoRef.current) {
+						videoRef.current.srcObject = stream
+					}
+					setCameraPermission(true)
+				} catch (err) {
+					console.error('Camera permission error (web):', err)
+					setCameraPermission(false)
+				}
+			} else {
+				setCameraPermission(true)
+			}
+		})()
+	}, [cameraFacing])
 
-	const handleAmountChange = (value: string): void => {
-		const numericValue = parseFloat(value)
-		if (!isNaN(numericValue)) {
-			setAmount(numericValue)
-		} else {
-			setAmount('')
+	const toggleCameraFacing = () => {
+		setCameraFacing(prev => (prev === 'back' ? 'front' : 'back'))
+	}
+
+	const capturePhotoNative = async () => {
+		if (Platform.OS !== 'web') {
+			const photoUri = `captured_photo_${Date.now()}.jpg`
+			setPhotoUri(photoUri)
 		}
 	}
 
-	const showModal = (message: string): void => {
-		setModalMessage(message)
-		setModalVisible(true)
+	const capturePhotoWeb = async () => {
+		if (videoRef.current) {
+			const canvas = document.createElement('canvas')
+			const context = canvas.getContext('2d')
+			canvas.width = videoRef.current.videoWidth
+			canvas.height = videoRef.current.videoHeight
+
+			if (context && videoRef.current) {
+				context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height)
+				const photo = canvas.toDataURL('image/png')
+				setPhotoUri(photo)
+			}
+		}
 	}
 
-	const handleAddTransaction = async (): Promise<void> => {
+	const handleAddTransaction = async () => {
 		if (!title.trim() || amount === '') {
-			showModal('Please fill in both fields.')
+			setModalMessage('Please fill in both fields.')
+			setModalVisible(true)
 			return
 		}
 
@@ -76,20 +91,25 @@ const AddTransaction: React.FC = () => {
 			title,
 			amount,
 			date: new Date().toISOString(),
-			receipt: receiptImage, // Используем receiptImage из хука
+			receipt: photoUri || '',
 		}
 
 		await addTransaction(transaction)
 
 		setTitle('')
 		setAmount('')
-		showModal('Transaction added!')
+		setPhotoUri(null)
+		setModalMessage('Transaction added!')
+		setModalVisible(true)
 	}
 
-	const buttonColor = colorScheme === 'dark' ? '#32CD32' : currentColors.tint
-
-	const toggleCameraFacing = () => {
-		setCameraFacing(cameraFacing === 'back' ? 'front' : 'back')
+	const handleAmountChange = (value: string) => {
+		const numericValue = parseFloat(value)
+		if (!isNaN(numericValue)) {
+			setAmount(numericValue)
+		} else {
+			setAmount('')
+		}
 	}
 
 	return (
@@ -125,60 +145,39 @@ const AddTransaction: React.FC = () => {
 				value={amount === '' ? '' : amount.toString()}
 				onChangeText={handleAmountChange}
 			/>
-			{receiptImage && (
-				<Image source={{ uri: receiptImage }} style={styles.receiptImage} />
+
+			{photoUri && (
+				<Image source={{ uri: photoUri }} style={styles.photoPreview} />
 			)}
 
-			{/* Камера для веба */}
-			{Platform.OS === 'web' ? (
-				cameraPermission && (
-					<View style={styles.webCameraContainer}>
-						<video
-							id='web-camera'
-							ref={videoRef}
-							autoPlay
-							muted
-							width='50%'
-							height='100%'
-						/>
-						<Button
-							title='Take Photo (Web)'
-							onPress={capturePhotoWeb}
-							color={buttonColor}
-						/>
-						{/* Переключение камеры для веба */}
-						<TouchableOpacity
-							style={styles.toggleButton}
-							onPress={toggleCameraFacing}
-						>
-							<Text style={styles.toggleButtonText}>Flip Camera</Text>
-						</TouchableOpacity>
-					</View>
-				)
-			) : nativeCameraPermission && device ? (
-				<View style={styles.cameraContainer}>
-					<CameraView style={styles.camera} facing={cameraFacing}>
-						<Button
-							title='Take Photo (React Native)'
-							onPress={capturePhotoNative}
-							color={buttonColor}
-						/>
-					</CameraView>
-					{/* Переключение камеры для мобильных устройств */}
-					<TouchableOpacity
-						style={styles.toggleButton}
-						onPress={toggleCameraFacing}
-					>
-						<Text style={styles.toggleButtonText}>Flip Camera</Text>
-					</TouchableOpacity>
-				</View>
-			) : null}
+			{Platform.OS === 'web'
+				? cameraPermission && (
+						<View style={styles.cameraContainer}>
+							<video ref={videoRef} autoPlay muted style={styles.video} />
+							<Button title='Take Photo (Web)' onPress={capturePhotoWeb} />
+						</View>
+				  )
+				: cameraPermission && (
+						<View style={styles.cameraContainer}>
+							<CameraView
+								style={styles.camera}
+								facing={cameraFacing}
+							></CameraView>
+							<Button
+								title='Take Photo (Native)'
+								onPress={capturePhotoNative}
+							/>
+						</View>
+				  )}
 
-			<Button
-				title='Add Transaction'
-				onPress={handleAddTransaction}
-				color={buttonColor}
-			/>
+			<TouchableOpacity
+				style={styles.toggleButton}
+				onPress={toggleCameraFacing}
+			>
+				<Text style={styles.toggleButtonText}>Flip Camera</Text>
+			</TouchableOpacity>
+
+			<Button title='Add Transaction' onPress={handleAddTransaction} />
 		</View>
 	)
 }
@@ -187,14 +186,13 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		justifyContent: 'center',
-		padding: 16,
 		alignItems: 'center',
+		padding: 16,
 	},
 	title: {
 		fontSize: 24,
 		fontWeight: 'bold',
 		marginBottom: 16,
-		textAlign: 'center',
 	},
 	input: {
 		height: 40,
@@ -202,40 +200,36 @@ const styles = StyleSheet.create({
 		marginBottom: 16,
 		paddingHorizontal: 8,
 		width: '100%',
-		maxWidth: 700,
+		maxWidth: 400,
 	},
-	receiptImage: {
+	cameraContainer: {
+		marginBottom: 16,
+		width: '100%',
+		alignItems: 'center',
+	},
+	camera: {
+		width: '100%',
+		height: 300,
+	},
+	video: {
+		width: '100%',
+		maxWidth: 400,
+		height: 300,
+	},
+	photoPreview: {
 		width: 200,
 		height: 200,
 		resizeMode: 'contain',
 		marginBottom: 16,
 	},
-	cameraContainer: {
-		width: '100%',
-		justifyContent: 'center',
-		alignItems: 'center',
-		marginBottom: 16,
-	},
-	webCameraContainer: {
-		width: '100%',
-		justifyContent: 'center',
-		alignItems: 'center',
-		marginBottom: 16,
-	},
-	camera: {
-		width: '100%',
-		maxWidth: 400,
-		height: 300,
-		marginBottom: 16,
-	},
 	toggleButton: {
-		marginTop: 10,
 		backgroundColor: '#4CAF50',
 		padding: 10,
+		marginTop: 10,
 		borderRadius: 5,
 	},
 	toggleButtonText: {
-		color: 'white',
+		color: '#fff',
 		fontSize: 14,
 	},
 })
