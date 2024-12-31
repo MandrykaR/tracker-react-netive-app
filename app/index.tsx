@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
 	View,
 	Text,
@@ -12,12 +12,30 @@ import {
 import { RenderItemProps } from '../types/types'
 import { useTransactions } from './TransactionContext'
 import { Colors } from '../constants/Colors'
+import { getCurrentLocation, Coordinates } from '../scripts/locationHandler'
 
 const HomeScreen: React.FC = () => {
 	const colorScheme = useColorScheme()
 	const currentColors = colorScheme === 'dark' ? Colors.dark : Colors.light
 	const { transactions, loadTransactions, deleteTransaction } =
 		useTransactions()
+
+	const [location, setLocation] = useState<Coordinates | null>(null)
+	const [isLoading, setIsLoading] = useState(true)
+
+	useEffect(() => {
+		const initializeLocation = async () => {
+			setIsLoading(true)
+			const currentLocation = await getCurrentLocation()
+			if (!currentLocation) {
+				console.log('Location Error', 'Could not fetch location.')
+			}
+			setLocation(currentLocation)
+			setIsLoading(false)
+		}
+
+		initializeLocation()
+	}, [])
 
 	useEffect(() => {
 		loadTransactions(1, 1000)
