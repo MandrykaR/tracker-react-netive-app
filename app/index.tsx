@@ -81,12 +81,6 @@ const HomeScreen: React.FC = () => {
 				renderItem={renderItem}
 				keyExtractor={item => item.id.toString()}
 			/>
-
-			{location && (
-				<Text style={{ color: currentColors.text }}>
-					Location: {location.latitude}, {location.longitude}
-				</Text>
-			)}
 		</View>
 	)
 }
