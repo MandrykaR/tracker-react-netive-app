@@ -5,14 +5,18 @@ import {
 	Dimensions,
 	StyleSheet,
 	useColorScheme,
+	ScrollView,
 } from 'react-native'
-import { BarChart } from 'react-native-chart-kit'
 
+import { BarChart } from 'react-native-chart-kit'
 import { useTransactions } from './TransactionContext'
 import { Colors } from '../constants/Colors'
 import { BarChartData, Transaction } from '../types/types'
 
-const MAX_CATEGORIES = 10
+const MAX_CATEGORIES = 20
+const screenWidth = Dimensions.get('window').width
+const chartWidth = screenWidth - 40
+const chartHeight = Math.min(chartWidth * 0.6, 300)
 
 const AnalyticsScreen: React.FC = () => {
 	const { transactions } = useTransactions()
@@ -20,12 +24,16 @@ const AnalyticsScreen: React.FC = () => {
 	const colorScheme = useColorScheme()
 	const isDarkMode = colorScheme === 'dark'
 
-
 	const totalExpenses = transactions.reduce(
 		(sum, transaction) => sum + transaction.amount,
 		0
 	)
+	const calculateLabelProps = (labels: string[]) => {
+		const fontSize = labels.length > 7 ? 8 : 12
+		const rotation = labels.length > 7 ? 45 : 0
 
+		return { fontSize, rotation }
+	}
 	const categories = useMemo<Record<string, number>>(() => {
 		const allCategories = transactions.reduce(
 			(acc: Record<string, number>, transaction: Transaction) => {
@@ -74,31 +82,34 @@ const AnalyticsScreen: React.FC = () => {
 				Expenses by Category
 			</Text>
 
-			<BarChart
-				data={barChartData}
-				width={Dimensions.get('window').width - 40}
-				height={220}
-				chartConfig={{
-					backgroundGradientFrom: isDarkMode
-						? Colors.dark.background
-						: Colors.light.background,
-					backgroundGradientTo: isDarkMode
-						? Colors.dark.background
-						: Colors.light.background,
-					color: (opacity = 1) =>
-						isDarkMode
-							? `rgba(255, 255, 255, ${opacity})`
-							: `rgba(0, 0, 0, ${opacity})`,
-					barPercentage: 0.5,
-					propsForLabels: {
-						fontSize: categoryLabels.length > 7 ? 8 : 12,
-						rotation: categoryLabels.length > 7 ? 45 : 0,
-					},
-				}}
-				yAxisLabel='$'
-				yAxisSuffix=''
-				style={styles.chart}
-			/>
+			<ScrollView
+				horizontal
+				contentContainerStyle={{ flexGrow: 1 }}
+				showsHorizontalScrollIndicator={false}
+			>
+				<BarChart
+					data={barChartData}
+					width={chartWidth}
+					height={300}
+					chartConfig={{
+						backgroundGradientFrom: isDarkMode
+							? Colors.dark.background
+							: Colors.light.background,
+						backgroundGradientTo: isDarkMode
+							? Colors.dark.background
+							: Colors.light.background,
+						color: (opacity = 1) =>
+							isDarkMode
+								? `rgba(255, 255, 255, ${opacity})`
+								: `rgba(0, 0, 0, ${opacity})`,
+						barPercentage: 0.5,
+						propsForLabels: calculateLabelProps(categoryLabels),
+					}}
+					yAxisLabel='$'
+					yAxisSuffix=''
+					style={styles.chart}
+				/>
+			</ScrollView>
 
 			{categoryLabels.length > MAX_CATEGORIES && (
 				<Text style={[styles.info, { color: currentColors.text }]}>
