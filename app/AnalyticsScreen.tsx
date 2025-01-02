@@ -107,6 +107,7 @@ const AnalyticsScreen: React.FC = () => {
 					yAxisLabel='$'
 					yAxisSuffix=''
 					style={styles.chart}
+					fromZero={true}
 				/>
 			</ScrollView>
 
