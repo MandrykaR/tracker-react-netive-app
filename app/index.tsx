@@ -7,6 +7,7 @@ import {
 	useColorScheme,
 	Button,
 	Image,
+	Alert,
 } from 'react-native'
 
 import { RenderItemProps } from '../types/types'
@@ -28,9 +29,11 @@ const HomeScreen: React.FC = () => {
 			setIsLoading(true)
 			const currentLocation = await getCurrentLocation()
 			if (!currentLocation) {
-				console.log('Location Error', 'Could not fetch location.')
+				Alert.alert('Error', 'Could not fetch location.')
+			} else {
+				setLocation(currentLocation)
+				console.log('Location:', currentLocation)
 			}
-			setLocation(currentLocation)
 			setIsLoading(false)
 		}
 
@@ -78,6 +81,12 @@ const HomeScreen: React.FC = () => {
 				renderItem={renderItem}
 				keyExtractor={item => item.id.toString()}
 			/>
+
+			{location && (
+				<Text style={{ color: currentColors.text }}>
+					Location: {location.latitude}, {location.longitude}
+				</Text>
+			)}
 		</View>
 	)
 }

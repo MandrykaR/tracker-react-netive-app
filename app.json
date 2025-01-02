@@ -49,11 +49,35 @@
 			},
 			"output": "static"
 		},
+		"ios": {
+			"infoPlist": {
+				"NSLocationAlwaysAndWhenInUseUsageDescription": "Allow Tracker to access your location in the background.",
+				"NSLocationAlwaysUsageDescription": "Allow Tracker to always access your location.",
+				"NSLocationWhenInUseUsageDescription": "Allow Tracker to access your location while using the app."
+			},
+			"isIosBackgroundLocationEnabled": true
+		},
+		"android": {
+			"permissions": [
+				"ACCESS_FINE_LOCATION",
+				"ACCESS_COARSE_LOCATION",
+				"ACCESS_BACKGROUND_LOCATION",
+				"FOREGROUND_SERVICE"
+			],
+			"isAndroidBackgroundLocationEnabled": true,
+			"isAndroidForegroundServiceEnabled": true
+		},
 		"plugins": [
 			[
 				"expo-camera",
 				{
 					"cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
+				}
+			],
+			[
+				"expo-location",
+				{
+					"locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
 				}
 			],
 			"expo-font",
