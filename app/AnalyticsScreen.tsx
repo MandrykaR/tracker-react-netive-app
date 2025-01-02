@@ -16,7 +16,6 @@ import { BarChartData, Transaction } from '../types/types'
 const MAX_CATEGORIES = 20
 const screenWidth = Dimensions.get('window').width
 const chartWidth = screenWidth - 40
-const chartHeight = Math.min(chartWidth * 0.6, 300)
 
 const AnalyticsScreen: React.FC = () => {
 	const { transactions } = useTransactions()
