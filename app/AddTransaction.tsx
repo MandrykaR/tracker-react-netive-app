@@ -67,7 +67,6 @@ const AddTransaction: React.FC = () => {
 	}
 
 	const isMobile = Platform.OS === 'ios' || Platform.OS === 'android'
-
 	const isSmallScreen = screenHeight < 830
 
 	return (
@@ -111,11 +110,10 @@ const AddTransaction: React.FC = () => {
 
 			{isMobile && cameraPermission && (
 				<View
-					style={
-						isSmallScreen
-							? styles.smallCameraContainer
-							: styles.nativeCameraContainer
-					}
+					style={[
+						styles.nativeCameraContainer,
+						Platform.OS === 'ios' && styles.iosCameraContainer, 
+					]}
 				>
 					<TouchableOpacity
 						style={isSmallScreen ? styles.smallButton : styles.button}
@@ -127,13 +125,7 @@ const AddTransaction: React.FC = () => {
 			)}
 
 			{!isMobile && cameraPermission && (
-				<View
-					style={
-						isSmallScreen
-							? styles.smallCameraContainer
-							: styles.webCameraContainer
-					}
-				>
+				<View style={styles.webCameraContainer}>
 					<video
 						id='web-camera'
 						ref={videoRef}
@@ -152,7 +144,7 @@ const AddTransaction: React.FC = () => {
 						style={isSmallScreen ? styles.smallButton : styles.toggleButton}
 						onPress={toggleWebCameraFacing}
 					>
-						<Text style={styles.toggleButtonText}>Flip Camera</Text>
+						<Text style={styles.buttonText}>Flip Camera</Text>
 					</TouchableOpacity>
 				</View>
 			)}
@@ -195,12 +187,6 @@ const styles = StyleSheet.create({
 		backgroundColor: '#fff',
 		color: '#000',
 	},
-	toggleButtonText: {
-		color: 'white',
-		fontSize: 16,
-		fontWeight: '600',
-		textAlign: 'center',
-	},
 	receiptImage: {
 		width: 200,
 		height: 200,
@@ -223,11 +209,10 @@ const styles = StyleSheet.create({
 		marginBottom: 16,
 		alignItems: 'center',
 	},
-	smallCameraContainer: {
-		flex: 1,
-		justifyContent: 'center',
-		marginBottom: 8,
-		alignItems: 'center',
+	iosCameraContainer: {
+		width: '80%', 
+		height: 200, 
+		marginBottom: 12, 
 	},
 	toggleButton: {
 		alignSelf: 'center',
@@ -239,12 +224,12 @@ const styles = StyleSheet.create({
 	},
 	smallButton: {
 		backgroundColor: '#4CAF50',
-		paddingVertical: 10,
-		width: screenWidth * 0.6,
-		borderRadius: 8,
+		paddingVertical: 10, 
+		width: screenWidth * 0.6, 
+		borderRadius: 8, 
 		alignItems: 'center',
 		alignSelf: 'center',
-		marginBottom: 12,
+		marginBottom: 12, 
 	},
 	button: {
 		backgroundColor: '#4CAF50',
