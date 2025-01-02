@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
 	View,
 	Text,
@@ -16,15 +16,16 @@ import { Colors } from '../constants/Colors'
 import CustomModal from '@/components/CustomModal'
 import { useCamera } from '@/hooks/useCamera'
 
-const screenWidth = Dimensions.get('window').width
-const screenHeight = Dimensions.get('window').height
-
 const AddTransaction: React.FC = () => {
 	const colorScheme = useColorScheme()
 	const themeColors = Colors[colorScheme === 'dark' ? 'dark' : 'light']
 
 	const [title, setTitle] = useState<string>('')
 	const [amount, setAmount] = useState<number | ''>('')
+
+	const [isLandscape, setIsLandscape] = useState(false)
+	const [isSmallScreen, setIsSmallScreen] = useState(false)
+
 	const { addTransaction } = useTransactions()
 	const [isModalVisible, setIsModalVisible] = useState(false)
 	const [modalMessage, setModalMessage] = useState('')
@@ -37,6 +38,27 @@ const AddTransaction: React.FC = () => {
 		capturePhotoNative,
 		toggleWebCameraFacing,
 	} = useCamera()
+
+	useEffect(() => {
+		const updateScreenInfo = () => {
+			const { width, height } = Dimensions.get('window')
+			setIsLandscape(width > height)
+			setIsSmallScreen(width < 490)
+		}
+
+		const dimensionListener = Dimensions.addEventListener(
+			'change',
+			updateScreenInfo
+		)
+
+		updateScreenInfo()
+
+		return () => {
+			if (dimensionListener && dimensionListener.remove) {
+				dimensionListener.remove()
+			}
+		}
+	}, [])
 
 	const validateAmountInput = (input: string): number | '' => {
 		const sanitized = input.replace(/[^0-9.]/g, '')
@@ -67,42 +89,45 @@ const AddTransaction: React.FC = () => {
 	}
 
 	const isMobile = Platform.OS === 'ios' || Platform.OS === 'android'
-	const isSmallScreen = screenHeight < 830
 
 	return (
 		<View
 			style={[styles.container, { backgroundColor: themeColors.background }]}
 		>
-			<Text style={[styles.title, { color: themeColors.text }]}>
+			<Text
+				style={[
+					styles.title,
+					{ color: themeColors.text },
+					isSmallScreen && styles.titleSmall,
+				]}
+			>
 				Add Transaction
 			</Text>
-			<TextInput
-				style={[
-					styles.input,
-					{
-						color: '#000',
-						borderColor: themeColors.icon,
-					},
-				]}
-				placeholder='Title'
-				placeholderTextColor={themeColors.icon}
-				value={title}
-				onChangeText={setTitle}
-			/>
-			<TextInput
-				style={[
-					styles.input,
-					{
-						color: '#000',
-						borderColor: themeColors.icon,
-					},
-				]}
-				placeholder='Amount'
-				placeholderTextColor={themeColors.icon}
-				keyboardType='numeric'
-				value={amount === '' ? '' : String(amount)}
-				onChangeText={text => setAmount(validateAmountInput(text))}
-			/>
+			<View style={styles.inputContainer}>
+				<TextInput
+					style={[
+						styles.input,
+						{ borderColor: themeColors.icon },
+						isSmallScreen && styles.inputSmall,
+					]}
+					placeholder='Title'
+					placeholderTextColor={themeColors.icon}
+					value={title}
+					onChangeText={setTitle}
+				/>
+				<TextInput
+					style={[
+						styles.input,
+						{ borderColor: themeColors.icon },
+						isSmallScreen && styles.inputSmall,
+					]}
+					placeholder='Amount'
+					placeholderTextColor={themeColors.icon}
+					keyboardType='numeric'
+					value={amount === '' ? '' : String(amount)}
+					onChangeText={text => setAmount(validateAmountInput(text))}
+				/>
+			</View>
 
 			{receiptImage && (
 				<Image source={{ uri: receiptImage }} style={styles.receiptImage} />
@@ -112,14 +137,20 @@ const AddTransaction: React.FC = () => {
 				<View
 					style={[
 						styles.nativeCameraContainer,
-						Platform.OS === 'ios' && styles.iosCameraContainer, 
+						Platform.OS === 'ios' && styles.iosCameraContainer,
 					]}
 				>
 					<TouchableOpacity
-						style={isSmallScreen ? styles.smallButton : styles.button}
+						style={[isLandscape ? styles.largeButton : styles.button]}
 						onPress={capturePhotoNative}
 					>
-						<Text style={styles.buttonText}>Capture Photo (Mobile)</Text>
+						<Text
+							style={[
+								isSmallScreen ? styles.buttonTextSmall : styles.buttonText,
+							]}
+						>
+							Capture Photo
+						</Text>
 					</TouchableOpacity>
 				</View>
 			)}
@@ -131,30 +162,53 @@ const AddTransaction: React.FC = () => {
 						ref={videoRef}
 						autoPlay
 						muted
-						width='50%'
-						height='100'
+						width='30%'
+						height='30%'
 					/>
 					<TouchableOpacity
-						style={isSmallScreen ? styles.smallButton : styles.button}
+						style={[isLandscape ? styles.largeButton : styles.button]}
 						onPress={capturePhotoWeb}
 					>
-						<Text style={styles.buttonText}>Take Photo</Text>
+						<Text
+							style={[
+								isSmallScreen ? styles.buttonTextSmall : styles.buttonText,
+							]}
+						>
+							Take Photo
+						</Text>
 					</TouchableOpacity>
 					<TouchableOpacity
-						style={isSmallScreen ? styles.smallButton : styles.toggleButton}
+						style={[
+							isLandscape ? styles.largeButton : styles.toggleButton,
+							{ marginBottom: 0 },
+						]}
 						onPress={toggleWebCameraFacing}
 					>
-						<Text style={styles.buttonText}>Flip Camera</Text>
+						<Text
+							style={[
+								isSmallScreen ? styles.buttonTextSmall : styles.buttonText,
+							]}
+						>
+							Flip Camera
+						</Text>
+					</TouchableOpacity>
+					<TouchableOpacity
+						style={[
+							isLandscape ? styles.largeButton : styles.button,
+							{ marginBottom: 0 },
+						]}
+						onPress={handleAddTransaction}
+					>
+						<Text
+							style={[
+								isSmallScreen ? styles.buttonTextSmall : styles.buttonText,
+							]}
+						>
+							Add Transaction
+						</Text>
 					</TouchableOpacity>
 				</View>
 			)}
-
-			<TouchableOpacity
-				style={isSmallScreen ? styles.smallButton : styles.button}
-				onPress={handleAddTransaction}
-			>
-				<Text style={styles.buttonText}>Add Transaction</Text>
-			</TouchableOpacity>
 
 			<CustomModal
 				visible={isModalVisible}
@@ -177,6 +231,15 @@ const styles = StyleSheet.create({
 		marginBottom: 16,
 		textAlign: 'center',
 	},
+	titleSmall: {
+		fontSize: 22,
+		marginBottom: 12,
+	},
+	inputContainer: {
+		marginHorizontal: 'auto',
+		marginVertical: 0,
+		alignItems: 'center',
+	},
 	input: {
 		height: 50,
 		borderWidth: 1,
@@ -187,9 +250,16 @@ const styles = StyleSheet.create({
 		backgroundColor: '#fff',
 		color: '#000',
 	},
+
+	inputSmall: {
+		height: 30,
+		fontSize: 14,
+		width: '100%',
+		marginBottom: 9,
+	},
 	receiptImage: {
-		width: 200,
-		height: 200,
+		width: 85,
+		height: 85,
 		resizeMode: 'contain',
 		marginBottom: 16,
 		alignSelf: 'center',
@@ -210,31 +280,33 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 	},
 	iosCameraContainer: {
-		width: '80%', 
-		height: 200, 
-		marginBottom: 12, 
+		width: '50%',
+		height: 100,
+		marginBottom: 12,
 	},
 	toggleButton: {
 		alignSelf: 'center',
 		paddingVertical: 12,
-		width: screenWidth * 0.7,
+		width: '60%',
 		backgroundColor: '#007BFF',
 		borderRadius: 10,
 		marginTop: 10,
+		marginBottom: 10,
 	},
-	smallButton: {
+	largeButton: {
 		backgroundColor: '#4CAF50',
-		paddingVertical: 10, 
-		width: screenWidth * 0.6, 
-		borderRadius: 8, 
+		paddingVertical: 8,
+		width: '30%',
+		borderRadius: 10,
 		alignItems: 'center',
 		alignSelf: 'center',
-		marginBottom: 12, 
+		marginBottom: 10,
+		fontSize: 10,
 	},
 	button: {
 		backgroundColor: '#4CAF50',
 		paddingVertical: 14,
-		width: screenWidth * 0.8,
+		width: '60%',
 		borderRadius: 10,
 		alignItems: 'center',
 		alignSelf: 'center',
@@ -245,6 +317,9 @@ const styles = StyleSheet.create({
 		fontSize: 18,
 		fontWeight: '600',
 		textAlign: 'center',
+	},
+	buttonTextSmall: {
+		fontSize: 10,
 	},
 })
 
