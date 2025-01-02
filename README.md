@@ -9,7 +9,7 @@
 - **[React](https://reactjs.org/)**
 
 ### Navigation
-- **[expo-router](https://docs.expo.dev/routing/)**
+- **[expo-router](https://docs.expo.dev/versions/latest/sdk/router/)**
 
 ### Permissions and Device APIs
 - **[expo-location](https://docs.expo.dev/versions/latest/sdk/location/)**
