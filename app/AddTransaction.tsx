@@ -8,15 +8,16 @@ import {
 	Platform,
 	Image,
 	useColorScheme,
+	Dimensions,
 } from 'react-native'
 
 import { useTransactions } from './TransactionContext'
 import { Colors } from '../constants/Colors'
-import { Dimensions } from 'react-native'
 import CustomModal from '@/components/CustomModal'
 import { useCamera } from '@/hooks/useCamera'
 
 const screenWidth = Dimensions.get('window').width
+const screenHeight = Dimensions.get('window').height
 
 const AddTransaction: React.FC = () => {
 	const colorScheme = useColorScheme()
@@ -65,6 +66,10 @@ const AddTransaction: React.FC = () => {
 		setIsModalVisible(true)
 	}
 
+	const isMobile = Platform.OS === 'ios' || Platform.OS === 'android'
+
+	const isSmallScreen = screenHeight < 830
+
 	return (
 		<View
 			style={[styles.container, { backgroundColor: themeColors.background }]}
@@ -73,14 +78,26 @@ const AddTransaction: React.FC = () => {
 				Add Transaction
 			</Text>
 			<TextInput
-				style={[styles.input, { color: '#000', borderColor: themeColors.icon }]}
+				style={[
+					styles.input,
+					{
+						color: '#000',
+						borderColor: themeColors.icon,
+					},
+				]}
 				placeholder='Title'
 				placeholderTextColor={themeColors.icon}
 				value={title}
 				onChangeText={setTitle}
 			/>
 			<TextInput
-				style={[styles.input, { color: '#000', borderColor: themeColors.icon }]}
+				style={[
+					styles.input,
+					{
+						color: '#000',
+						borderColor: themeColors.icon,
+					},
+				]}
 				placeholder='Amount'
 				placeholderTextColor={themeColors.icon}
 				keyboardType='numeric'
@@ -92,40 +109,58 @@ const AddTransaction: React.FC = () => {
 				<Image source={{ uri: receiptImage }} style={styles.receiptImage} />
 			)}
 
-			{Platform.OS === 'web'
-				? cameraPermission && (
-						<View style={styles.webCameraContainer}>
-							<video
-								id='web-camera'
-								ref={videoRef}
-								autoPlay
-								muted
-								width='50%'
-								height='100'
-							/>
-							<TouchableOpacity style={styles.button} onPress={capturePhotoWeb}>
-								<Text style={styles.buttonText}>Take Photo (Web)</Text>
-							</TouchableOpacity>
-							<TouchableOpacity
-								style={styles.toggleButton}
-								onPress={toggleWebCameraFacing}
-							>
-								<Text style={styles.toggleButtonText}>Flip Camera</Text>
-							</TouchableOpacity>
-						</View>
-				  )
-				: cameraPermission && (
-						<View style={styles.nativeCameraContainer}>
-							<TouchableOpacity
-								style={styles.button}
-								onPress={capturePhotoNative}
-							>
-								<Text style={styles.buttonText}>Capture Photo (Native)</Text>
-							</TouchableOpacity>
-						</View>
-				  )}
+			{isMobile && cameraPermission && (
+				<View
+					style={
+						isSmallScreen
+							? styles.smallCameraContainer
+							: styles.nativeCameraContainer
+					}
+				>
+					<TouchableOpacity
+						style={isSmallScreen ? styles.smallButton : styles.button}
+						onPress={capturePhotoNative}
+					>
+						<Text style={styles.buttonText}>Capture Photo (Mobile)</Text>
+					</TouchableOpacity>
+				</View>
+			)}
 
-			<TouchableOpacity style={styles.button} onPress={handleAddTransaction}>
+			{!isMobile && cameraPermission && (
+				<View
+					style={
+						isSmallScreen
+							? styles.smallCameraContainer
+							: styles.webCameraContainer
+					}
+				>
+					<video
+						id='web-camera'
+						ref={videoRef}
+						autoPlay
+						muted
+						width='50%'
+						height='100'
+					/>
+					<TouchableOpacity
+						style={isSmallScreen ? styles.smallButton : styles.button}
+						onPress={capturePhotoWeb}
+					>
+						<Text style={styles.buttonText}>Take Photo</Text>
+					</TouchableOpacity>
+					<TouchableOpacity
+						style={isSmallScreen ? styles.smallButton : styles.toggleButton}
+						onPress={toggleWebCameraFacing}
+					>
+						<Text style={styles.toggleButtonText}>Flip Camera</Text>
+					</TouchableOpacity>
+				</View>
+			)}
+
+			<TouchableOpacity
+				style={isSmallScreen ? styles.smallButton : styles.button}
+				onPress={handleAddTransaction}
+			>
 				<Text style={styles.buttonText}>Add Transaction</Text>
 			</TouchableOpacity>
 
@@ -160,6 +195,12 @@ const styles = StyleSheet.create({
 		backgroundColor: '#fff',
 		color: '#000',
 	},
+	toggleButtonText: {
+		color: 'white',
+		fontSize: 16,
+		fontWeight: '600',
+		textAlign: 'center',
+	},
 	receiptImage: {
 		width: 200,
 		height: 200,
@@ -182,6 +223,12 @@ const styles = StyleSheet.create({
 		marginBottom: 16,
 		alignItems: 'center',
 	},
+	smallCameraContainer: {
+		flex: 1,
+		justifyContent: 'center',
+		marginBottom: 8,
+		alignItems: 'center',
+	},
 	toggleButton: {
 		alignSelf: 'center',
 		paddingVertical: 12,
@@ -190,11 +237,14 @@ const styles = StyleSheet.create({
 		borderRadius: 10,
 		marginTop: 10,
 	},
-	toggleButtonText: {
-		color: 'white',
-		fontSize: 16,
-		fontWeight: '600',
-		textAlign: 'center',
+	smallButton: {
+		backgroundColor: '#4CAF50',
+		paddingVertical: 10,
+		width: screenWidth * 0.6,
+		borderRadius: 8,
+		alignItems: 'center',
+		alignSelf: 'center',
+		marginBottom: 12,
 	},
 	button: {
 		backgroundColor: '#4CAF50',

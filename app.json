@@ -53,7 +53,8 @@
 			"infoPlist": {
 				"NSLocationAlwaysAndWhenInUseUsageDescription": "Allow Tracker to access your location in the background.",
 				"NSLocationAlwaysUsageDescription": "Allow Tracker to always access your location.",
-				"NSLocationWhenInUseUsageDescription": "Allow Tracker to access your location while using the app."
+				"NSLocationWhenInUseUsageDescription": "Allow Tracker to access your location while using the app.",
+				"NSCameraUsageDescription": "This app requires access to the camera to take photos of receipts."
 			},
 			"isIosBackgroundLocationEnabled": true
 		},
