@@ -42,7 +42,7 @@ const AddTransaction: React.FC = () => {
 	useEffect(() => {
 		const updateOrientation = () => {
 			const { width, height } = Dimensions.get('window')
-			setIsLandscape(width > height) 
+			setIsLandscape(width > height)
 		}
 
 		const dimensionListener = Dimensions.addEventListener(
@@ -50,7 +50,7 @@ const AddTransaction: React.FC = () => {
 			updateOrientation
 		)
 
-		updateOrientation() 
+		updateOrientation()
 
 		return () => {
 			if (dimensionListener && dimensionListener.remove) {
@@ -76,6 +76,7 @@ const AddTransaction: React.FC = () => {
 			amount,
 			date: new Date().toISOString(),
 			receipt: receiptImage,
+			isSynced: false,
 		}
 
 		await addTransaction(transaction)
@@ -88,13 +89,13 @@ const AddTransaction: React.FC = () => {
 
 	const isMobile = Platform.OS === 'ios' || Platform.OS === 'android'
 
-	const isSmallScreen = Dimensions.get('window').width < 430 
+	const isSmallScreen = Dimensions.get('window').width < 430
 
-	const titleFontSize = isSmallScreen ? 14 : 28 
-	const inputHeight = isSmallScreen ? 40 : 50 
-	const inputFontSize = isSmallScreen ? 14 : 16 
+	const titleFontSize = isSmallScreen ? 14 : 28
+	const inputHeight = isSmallScreen ? 40 : 50
+	const inputFontSize = isSmallScreen ? 14 : 16
 
-	const inputLandscapeWidth = isLandscape ? '70%' : '100%' 
+	const inputLandscapeWidth = isLandscape ? '70%' : '100%'
 
 	const { width } = Dimensions.get('window')
 	const imageSize = width * 0.2
@@ -176,8 +177,8 @@ const AddTransaction: React.FC = () => {
 						>
 							<Text
 								style={{
-									fontSize: Dimensions.get('window').width < 430 ? 14 : 18, 
-									textAlign: 'center', 
+									fontSize: Dimensions.get('window').width < 430 ? 14 : 18,
+									textAlign: 'center',
 								}}
 							>
 								Capture Photo
@@ -219,7 +220,7 @@ const AddTransaction: React.FC = () => {
 										styles.buttonText,
 										{
 											fontSize: Dimensions.get('window').width < 430 ? 14 : 18,
-											textAlign: 'center', 
+											textAlign: 'center',
 										},
 									]}
 								>
@@ -232,15 +233,15 @@ const AddTransaction: React.FC = () => {
 								style={{
 									width: '100%',
 									marginVertical: 10,
-									alignItems: 'center', 
+									alignItems: 'center',
 								}}
 							>
 								<Text
 									style={[
 										styles.buttonText,
 										{
-											fontSize: Dimensions.get('window').width < 430 ? 14 : 18, 
-											textAlign: 'center', 
+											fontSize: Dimensions.get('window').width < 430 ? 14 : 18,
+											textAlign: 'center',
 										},
 									]}
 								>
@@ -253,15 +254,15 @@ const AddTransaction: React.FC = () => {
 								style={{
 									width: '100%',
 									marginVertical: 10,
-									alignItems: 'center', 
+									alignItems: 'center',
 								}}
 							>
 								<Text
 									style={[
 										styles.buttonTextAdd,
 										{
-											fontSize: Dimensions.get('window').width < 430 ? 14 : 18, 
-											textAlign: 'center', 
+											fontSize: Dimensions.get('window').width < 430 ? 14 : 18,
+											textAlign: 'center',
 										},
 									]}
 								>

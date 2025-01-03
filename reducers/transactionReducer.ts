@@ -1,4 +1,4 @@
-import { Transaction } from '../app/TransactionContext'
+import { Transaction } from '../types/types'
 
 export type Action =
 	| { type: 'SET_TRANSACTIONS'; transactions: Transaction[] }

@@ -11,6 +11,7 @@ export interface Transaction {
 	amount: number
 	date: string
 	receipt: string | null
+	isSynced: boolean
 }
 
 export interface TransactionProviderProps {
