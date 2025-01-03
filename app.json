@@ -8,11 +8,11 @@
 			"minify": false
 		},
 		"orientation": "portrait",
-		"icon": "./public/assets/images/money.png",
+		"icon": "./public/assets/images/android-chrome-192x192.png",
 		"scheme": ["tracker"],
 		"userInterfaceStyle": "automatic",
 		"splash": {
-			"image": "./public/assets/images/card.png",
+			"image": "./public/assets/images/android-chrome-192x192.png",
 			"resizeMode": "contain",
 			"backgroundColor": "#ffffff"
 		},
