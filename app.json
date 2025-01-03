@@ -28,7 +28,7 @@
 				"description": "An app for tracking transactions",
 				"icons": [
 					{
-						"src": "./assets/images/logo-192px.png",
+						"src": "./assets/images/android-chrome-192x192.png",
 						"sizes": "192x192",
 						"type": "image/png"
 					},

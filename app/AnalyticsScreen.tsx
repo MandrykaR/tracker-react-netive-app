@@ -63,61 +63,66 @@ const AnalyticsScreen: React.FC = () => {
 	const currentColors = isDarkMode ? Colors.dark : Colors.light
 
 	return (
-		<View
-			style={[styles.container, { backgroundColor: currentColors.background }]}
-		>
+		<ScrollView contentContainerStyle={{ flexGrow: 1 }}>
 			<View
 				style={[
-					styles.totalExpensesContainer,
-					{ backgroundColor: 'rgb(14, 23, 67)' },
+					styles.container,
+					{ backgroundColor: currentColors.background },
 				]}
 			>
-				<Text style={[styles.totalExpenses, { color: currentColors.text }]}>
-					Total Expenses: ${totalExpenses.toFixed(2)}
+				<View
+					style={[
+						styles.totalExpensesContainer,
+						{ backgroundColor: 'rgb(14, 23, 67)' },
+					]}
+				>
+					<Text style={[styles.totalExpenses, { color: '#fff' }]}>
+						Total Expenses: ${totalExpenses.toFixed(2)}
+					</Text>
+				</View>
+
+				<Text style={[styles.title, { color: currentColors.text }]}>
+					Expenses by Category
 				</Text>
+
+				<ScrollView
+					horizontal
+					contentContainerStyle={{ flexGrow: 1 }}
+					showsHorizontalScrollIndicator={false}
+				>
+					<BarChart
+						data={barChartData}
+						width={chartWidth}
+						height={300}
+						chartConfig={{
+							backgroundGradientFrom: isDarkMode
+								? Colors.dark.background
+								: Colors.light.background,
+							backgroundGradientTo: isDarkMode
+								? Colors.dark.background
+								: Colors.light.background,
+							color: (opacity = 1) =>
+								isDarkMode
+									? `rgba(255, 255, 255, ${opacity})`
+									: `rgba(0, 0, 0, ${opacity})`,
+							barPercentage: 0.5,
+							propsForLabels: calculateLabelProps(categoryLabels),
+						}}
+						yAxisLabel='$'
+						yAxisSuffix=''
+						style={styles.chart}
+						fromZero={true}
+					/>
+				</ScrollView>
+
+				{categoryLabels.length > MAX_CATEGORIES && (
+					<Text style={[styles.info, { color: currentColors.text }]}>
+						Showing top {MAX_CATEGORIES} categories. Consider grouping smaller
+						categories.
+					</Text>
+				)}
 			</View>
-
-			<Text style={[styles.title, { color: currentColors.text }]}>
-				Expenses by Category
-			</Text>
-
-			<ScrollView
-				horizontal
-				contentContainerStyle={{ flexGrow: 1 }}
-				showsHorizontalScrollIndicator={false}
-			>
-				<BarChart
-					data={barChartData}
-					width={chartWidth}
-					height={300}
-					chartConfig={{
-						backgroundGradientFrom: isDarkMode
-							? Colors.dark.background
-							: Colors.light.background,
-						backgroundGradientTo: isDarkMode
-							? Colors.dark.background
-							: Colors.light.background,
-						color: (opacity = 1) =>
-							isDarkMode
-								? `rgba(255, 255, 255, ${opacity})`
-								: `rgba(0, 0, 0, ${opacity})`,
-						barPercentage: 0.5,
-						propsForLabels: calculateLabelProps(categoryLabels),
-					}}
-					yAxisLabel='$'
-					yAxisSuffix=''
-					style={styles.chart}
-					fromZero={true}
-				/>
-			</ScrollView>
-
-			{categoryLabels.length > MAX_CATEGORIES && (
-				<Text style={[styles.info, { color: currentColors.text }]}>
-					Showing top {MAX_CATEGORIES} categories. Consider grouping smaller
-					categories.
-				</Text>
-			)}
-		</View>
+		</ScrollView>
 	)
 }
 
