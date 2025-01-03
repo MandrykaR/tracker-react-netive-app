@@ -9,6 +9,7 @@ const STATIC_FILES = [
 	'/dist/+not-found.html',
 	'/dist/AddTransaction.html',
 	'/dist/AnalyticsScreen.html',
+	'/dist/OfflineScreen.html',
 	'/dist/TransactionContext.html',
 	'/dist/_expo/static/js/entry-98c524306db50a5823efa7739e775bbe.js',
 ]

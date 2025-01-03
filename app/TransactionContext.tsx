@@ -1,11 +1,4 @@
-import React, {
-	createContext,
-	useReducer,
-	useContext,
-	useState,
-	useEffect,
-} from 'react'
-import axios from 'axios'
+import React, { createContext, useReducer, useContext, useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import { transactionReducer } from '../reducers/transactionReducer'
@@ -20,30 +13,30 @@ const TransactionContext = createContext<TransactionContextType | undefined>(
 	undefined
 )
 
-const API_URL = 'https://67135de66c5f5ced66262fd3.mockapi.io/money'
-
 const TransactionProvider: React.FC<TransactionProviderProps> = ({
 	children,
 }) => {
 	const [transactions, dispatch] = useReducer(transactionReducer, [])
 	const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-	const loadTransactionsFromServer = async (
+	const loadTransactions = async (
 		page: number,
 		limit: number
 	): Promise<Transaction[]> => {
 		try {
-			const response = await axios.get(`${API_URL}?page=${page}&limit=${limit}`)
-			const transactionsList: Transaction[] = response.data
-			dispatch({
-				type: 'SET_TRANSACTIONS',
-				transactions: transactionsList,
-			})
-			await AsyncStorage.setItem(
-				'transactions',
-				JSON.stringify(transactionsList)
-			)
-			return transactionsList
+			const storedTransactions = await AsyncStorage.getItem('transactions')
+			if (storedTransactions) {
+				const transactionsList: Transaction[] = JSON.parse(storedTransactions)
+				const start = (page - 1) * limit
+				const end = start + limit
+				const paginatedTransactions = transactionsList.slice(start, end)
+				dispatch({
+					type: 'SET_TRANSACTIONS',
+					transactions: paginatedTransactions,
+				})
+				return paginatedTransactions
+			}
+			return []
 		} catch (error) {
 			setErrorMessage('Error loading transactions')
 			console.error('Error loading transactions:', error)
@@ -51,47 +44,22 @@ const TransactionProvider: React.FC<TransactionProviderProps> = ({
 		}
 	}
 
-	const loadTransactionsFromStorage = async (): Promise<Transaction[]> => {
-		const storedTransactions = await AsyncStorage.getItem('transactions')
-		if (storedTransactions) {
-			return JSON.parse(storedTransactions)
-		}
-		return []
-	}
-
-	useEffect(() => {
-		const fetchTransactions = async () => {
-			const storedTransactions = await loadTransactionsFromStorage()
-			if (storedTransactions.length > 0) {
-				dispatch({
-					type: 'SET_TRANSACTIONS',
-					transactions: storedTransactions,
-				})
-			} else {
-				await loadTransactionsFromServer(1, 10)
-			}
-		}
-		fetchTransactions()
-	}, [])
-
 	const addTransaction = async (transaction: Transaction): Promise<void> => {
 		try {
-			if (navigator.onLine) {
-				const response = await axios.post(API_URL, transaction)
-				dispatch({ type: 'ADD_TRANSACTION', transaction: response.data })
-				const updatedTransactions = [...transactions, response.data]
-				await AsyncStorage.setItem(
-					'transactions',
-					JSON.stringify(updatedTransactions)
-				)
+			const storedTransactions = await AsyncStorage.getItem('transactions')
+			let updatedTransactions: Transaction[] = []
+
+			if (storedTransactions) {
+				updatedTransactions = [...JSON.parse(storedTransactions), transaction]
 			} else {
-				const updatedTransactions = [...transactions, transaction]
-				dispatch({ type: 'ADD_TRANSACTION', transaction })
-				await AsyncStorage.setItem(
-					'transactions',
-					JSON.stringify(updatedTransactions)
-				)
+				updatedTransactions = [transaction]
 			}
+
+			await AsyncStorage.setItem(
+				'transactions',
+				JSON.stringify(updatedTransactions)
+			)
+			dispatch({ type: 'ADD_TRANSACTION', transaction })
 		} catch (error) {
 			setErrorMessage('Error adding transaction')
 			console.error('Error adding transaction:', error)
@@ -100,25 +68,17 @@ const TransactionProvider: React.FC<TransactionProviderProps> = ({
 
 	const deleteTransaction = async (id: number): Promise<void> => {
 		try {
-			if (navigator.onLine) {
-				await axios.delete(`${API_URL}/${id}`)
-				dispatch({ type: 'DELETE_TRANSACTION', id })
-				const updatedTransactions = transactions.filter(
-					transaction => transaction.id !== id
+			const storedTransactions = await AsyncStorage.getItem('transactions')
+			if (storedTransactions) {
+				const updatedTransactions = JSON.parse(storedTransactions).filter(
+					(transaction: Transaction) => transaction.id !== id
 				)
+
 				await AsyncStorage.setItem(
 					'transactions',
 					JSON.stringify(updatedTransactions)
 				)
-			} else {
 				dispatch({ type: 'DELETE_TRANSACTION', id })
-				const updatedTransactions = transactions.filter(
-					transaction => transaction.id !== id
-				)
-				await AsyncStorage.setItem(
-					'transactions',
-					JSON.stringify(updatedTransactions)
-				)
 			}
 		} catch (error) {
 			setErrorMessage('Error deleting transaction')
@@ -137,7 +97,7 @@ const TransactionProvider: React.FC<TransactionProviderProps> = ({
 					transactions,
 					addTransaction,
 					deleteTransaction,
-					loadTransactions: loadTransactionsFromServer,
+					loadTransactions,
 				}}
 			>
 				{children}
