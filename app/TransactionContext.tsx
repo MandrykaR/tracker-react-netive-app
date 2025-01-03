@@ -1,6 +1,11 @@
-import React, { createContext, useReducer, useContext, useState } from 'react'
+import React, {
+	createContext,
+	useReducer,
+	useContext,
+	useState,
+	useEffect,
+} from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-
 import { transactionReducer } from '../reducers/transactionReducer'
 import CustomModal from '../components/CustomModal'
 import {
@@ -24,6 +29,20 @@ const TransactionProvider: React.FC<TransactionProviderProps> = ({
 		limit: number
 	): Promise<Transaction[]> => {
 		try {
+			const cachedResponse = await caches.match('/transactions') 
+			if (cachedResponse) {
+				const cachedTransactions = await cachedResponse.json() 
+				console.log('Транзакции получены из кэша')
+				const start = (page - 1) * limit
+				const end = start + limit
+				const paginatedTransactions = cachedTransactions.slice(start, end)
+				dispatch({
+					type: 'SET_TRANSACTIONS',
+					transactions: paginatedTransactions,
+				})
+				return paginatedTransactions
+			}
+
 			const storedTransactions = await AsyncStorage.getItem('transactions')
 			if (storedTransactions) {
 				const transactionsList: Transaction[] = JSON.parse(storedTransactions)
@@ -36,6 +55,7 @@ const TransactionProvider: React.FC<TransactionProviderProps> = ({
 				})
 				return paginatedTransactions
 			}
+
 			return []
 		} catch (error) {
 			setErrorMessage('Error loading transactions')
@@ -60,6 +80,12 @@ const TransactionProvider: React.FC<TransactionProviderProps> = ({
 				JSON.stringify(updatedTransactions)
 			)
 			dispatch({ type: 'ADD_TRANSACTION', transaction })
+
+			const cache = await caches.open('my-app-cache-v1')
+			cache.put(
+				'/transactions',
+				new Response(JSON.stringify(updatedTransactions))
+			)
 		} catch (error) {
 			setErrorMessage('Error adding transaction')
 			console.error('Error adding transaction:', error)
@@ -79,6 +105,12 @@ const TransactionProvider: React.FC<TransactionProviderProps> = ({
 					JSON.stringify(updatedTransactions)
 				)
 				dispatch({ type: 'DELETE_TRANSACTION', id })
+
+				const cache = await caches.open('my-app-cache-v1')
+				cache.put(
+					'/transactions',
+					new Response(JSON.stringify(updatedTransactions))
+				)
 			}
 		} catch (error) {
 			setErrorMessage('Error deleting transaction')
@@ -89,6 +121,10 @@ const TransactionProvider: React.FC<TransactionProviderProps> = ({
 	const handleCloseModal = () => {
 		setErrorMessage(null)
 	}
+
+	useEffect(() => {
+		loadTransactions(1, 10)
+	}, [])
 
 	return (
 		<>

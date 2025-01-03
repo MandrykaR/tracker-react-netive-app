@@ -9,7 +9,6 @@ const STATIC_FILES = [
 	'/dist/+not-found.html',
 	'/dist/AddTransaction.html',
 	'/dist/AnalyticsScreen.html',
-	'/dist/OfflineScreen.html',
 	'/dist/TransactionContext.html',
 	'/dist/_expo/static/js/entry-98c524306db50a5823efa7739e775bbe.js',
 ]
@@ -41,21 +40,34 @@ self.addEventListener('activate', event => {
 })
 
 self.addEventListener('fetch', event => {
-	console.log('Fetching:', event.request.url)
-	if (event.request.url.startsWith('http')) {
+	const url = event.request.url
+	console.log('Fetching:', url)
+
+	if (url.startsWith('https://67135de66c5f5ced66262fd3.mockapi.io/money')) {
 		event.respondWith(
 			caches.match(event.request).then(cachedResponse => {
 				if (cachedResponse) {
 					return cachedResponse
 				}
+
 				return fetch(event.request)
 					.then(response => {
-						return caches.open(CACHE_NAME).then(cache => {
-							cache.put(event.request, response.clone())
-							return response
-						})
+						if (response.ok) {
+							caches.open(CACHE_NAME).then(cache => {
+								cache.put(event.request, response.clone())
+							})
+						}
+						return response
 					})
-					.catch(() => caches.match('/dist/index.html'))
+					.catch(() => {
+						return caches.match('/dist/index.html')
+					})
+			})
+		)
+	} else {
+		event.respondWith(
+			caches.match(event.request).then(cachedResponse => {
+				return cachedResponse || fetch(event.request)
 			})
 		)
 	}
