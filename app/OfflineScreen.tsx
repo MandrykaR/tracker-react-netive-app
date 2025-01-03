@@ -1,6 +1,9 @@
 import React from 'react'
-import { View, Text, Button, StyleSheet, useColorScheme } from 'react-native'
+
+import { View, Text, Button, useColorScheme } from 'react-native'
 import { Colors } from '../constants/Colors'
+
+import styles from '../styles/offlineScreenStyles'
 
 interface OfflineScreenProps {
 	onRetry: () => void
@@ -37,17 +40,5 @@ const OfflineScreen: React.FC<OfflineScreenProps> = ({ onRetry }) => {
 		</View>
 	)
 }
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		justifyContent: 'center',
-		alignItems: 'center',
-	},
-	text: {
-		fontSize: 24,
-		marginBottom: 20,
-	},
-})
 
 export default OfflineScreen
