@@ -11,11 +11,12 @@ import {
 	ScrollView,
 } from 'react-native'
 
-import { useTransactions } from './TransactionContext.tsx'
 import { Colors } from '../constants/Colors'
-import styles from '../styles/addStyles.ts'
-import CustomModal from '@/components/CustomModal'
+import { useTransactions } from './TransactionContext.tsx'
 import { useCamera } from '@/hooks/useCamera'
+import CustomModal from '@/components/CustomModal'
+
+import styles from '../styles/addStyles.ts'
 
 const AddTransaction: React.FC = () => {
 	const colorScheme = useColorScheme()
@@ -208,27 +209,6 @@ const AddTransaction: React.FC = () => {
 
 						<View>
 							<TouchableOpacity
-								onPress={capturePhotoWeb}
-								style={{
-									width: '100%',
-									marginVertical: 10,
-									alignItems: 'center',
-								}}
-							>
-								<Text
-									style={[
-										styles.buttonText,
-										{
-											fontSize: Dimensions.get('window').width < 430 ? 14 : 18,
-											textAlign: 'center',
-										},
-									]}
-								>
-									Take Photo
-								</Text>
-							</TouchableOpacity>
-
-							<TouchableOpacity
 								onPress={toggleWebCameraFacing}
 								style={{
 									width: '100%',
@@ -246,6 +226,27 @@ const AddTransaction: React.FC = () => {
 									]}
 								>
 									Flip Camera
+								</Text>
+							</TouchableOpacity>
+
+							<TouchableOpacity
+								onPress={capturePhotoWeb}
+								style={{
+									width: '100%',
+									marginVertical: 10,
+									alignItems: 'center',
+								}}
+							>
+								<Text
+									style={[
+										styles.buttonText,
+										{
+											fontSize: Dimensions.get('window').width < 430 ? 14 : 18,
+											textAlign: 'center',
+										},
+									]}
+								>
+									Take Photo
 								</Text>
 							</TouchableOpacity>
 

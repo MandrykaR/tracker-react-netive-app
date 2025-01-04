@@ -1,11 +1,11 @@
 import React from 'react'
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text } from 'react-native'
+import { useColorScheme } from 'react-native'
+
 import {
 	createMaterialTopTabNavigator,
 	MaterialTopTabNavigationOptions,
 } from '@react-navigation/material-top-tabs'
-
-import { useColorScheme } from 'react-native'
 
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 import { Colors } from '@/constants/Colors'

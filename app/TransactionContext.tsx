@@ -5,9 +5,12 @@ import React, {
 	useState,
 	useEffect,
 } from 'react'
+
 import AsyncStorage from '@react-native-async-storage/async-storage'
+
 import { transactionReducer } from '../reducers/transactionReducer'
 import CustomModal from '../components/CustomModal'
+
 import {
 	Transaction,
 	TransactionContextType,
@@ -29,10 +32,9 @@ const TransactionProvider: React.FC<TransactionProviderProps> = ({
 		limit: number
 	): Promise<Transaction[]> => {
 		try {
-			const cachedResponse = await caches.match('/transactions') 
+			const cachedResponse = await caches.match('/transactions')
 			if (cachedResponse) {
-				const cachedTransactions = await cachedResponse.json() 
-				console.log('Транзакции получены из кэша')
+				const cachedTransactions = await cachedResponse.json()
 				const start = (page - 1) * limit
 				const end = start + limit
 				const paginatedTransactions = cachedTransactions.slice(start, end)

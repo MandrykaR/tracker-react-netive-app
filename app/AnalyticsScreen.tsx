@@ -7,11 +7,13 @@ import {
 	ScrollView,
 } from 'react-native'
 
-import styles from '../styles/analyticsStyles'
 import { BarChart } from 'react-native-chart-kit'
+
 import { useTransactions } from './TransactionContext'
 import { Colors } from '../constants/Colors'
 import { BarChartData, Transaction } from '../types/types'
+
+import styles from '../styles/analyticsStyles'
 
 const MAX_CATEGORIES = 20
 const screenWidth = Dimensions.get('window').width

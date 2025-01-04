@@ -9,11 +9,13 @@ import {
 	Alert,
 } from 'react-native'
 
-import styles from '../styles/homeScreenStyles'
-import { RenderItemProps } from '../types/types'
 import { useTransactions } from './TransactionContext'
-import { Colors } from '../constants/Colors'
 import { getCurrentLocation, Coordinates } from '../scripts/locationHandler'
+
+import { RenderItemProps } from '../types/types'
+import { Colors } from '../constants/Colors'
+
+import styles from '../styles/homeScreenStyles'
 
 const HomeScreen: React.FC = () => {
 	const colorScheme = useColorScheme()
@@ -32,7 +34,6 @@ const HomeScreen: React.FC = () => {
 				Alert.alert('Error', 'Could not fetch location.')
 			} else {
 				setLocation(currentLocation)
-				console.log('Location:', currentLocation)
 			}
 			setIsLoading(false)
 		}
