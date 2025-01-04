@@ -160,7 +160,7 @@ const AddTransaction: React.FC = () => {
 					/>
 				)}
 
-				{isMobile && cameraPermission && (
+				{isMobile && (
 					<View
 						style={[
 							styles.nativeCameraContainer,
@@ -173,7 +173,11 @@ const AddTransaction: React.FC = () => {
 						]}
 					>
 						<TouchableOpacity
-							onPress={capturePhotoNative}
+							onPress={
+								cameraPermission
+									? capturePhotoNative
+									: () => setModalMessage('Camera permission is required')
+							}
 							style={{ width: '100%' }}
 						>
 							<Text
@@ -188,7 +192,7 @@ const AddTransaction: React.FC = () => {
 					</View>
 				)}
 
-				{!isMobile && cameraPermission && (
+				{!isMobile && (
 					<View
 						style={[
 							styles.webCameraContainer,
@@ -209,7 +213,11 @@ const AddTransaction: React.FC = () => {
 
 						<View>
 							<TouchableOpacity
-								onPress={toggleWebCameraFacing}
+								onPress={
+									cameraPermission
+										? toggleWebCameraFacing
+										: () => setModalMessage('Camera permission is required')
+								}
 								style={{
 									width: '100%',
 									marginVertical: 10,
@@ -230,7 +238,11 @@ const AddTransaction: React.FC = () => {
 							</TouchableOpacity>
 
 							<TouchableOpacity
-								onPress={capturePhotoWeb}
+								onPress={
+									cameraPermission
+										? capturePhotoWeb
+										: () => setModalMessage('Camera permission is required')
+								}
 								style={{
 									width: '100%',
 									marginVertical: 10,
