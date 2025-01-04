@@ -8,9 +8,6 @@
 - **[React Native](https://reactnative.dev/)**
 - **[React](https://reactjs.org/)**
 
-### Navigation
-- **[expo-router](https://docs.expo.dev/versions/latest/sdk/router/)**
-
 ### Permissions and Device APIs
 - **[expo-location](https://docs.expo.dev/versions/latest/sdk/location/)**
 - **[expo-camera](https://docs.expo.dev/versions/latest/sdk/camera/)**
@@ -24,7 +21,7 @@
 
 | **Step**                                **Command**
 
-| **Start the development server:**       `npx expo start`
+| **Start the server:**       `npx expo export` -> `npx serve dist`
 
 ### Author
 
