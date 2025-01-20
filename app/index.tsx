@@ -19,7 +19,17 @@ const HomeScreen: React.FC = () => {
 	const { transactions, loadTransactions, deleteTransaction } =
 		useTransactions()
 
+	const reloadOnce = () => {
+		const hasReloaded = localStorage.getItem('hasReloaded')
+
+		if (!hasReloaded) {
+			localStorage.setItem('hasReloaded', 'true')
+			window.location.reload()
+		}
+	}
+
 	useEffect(() => {
+		reloadOnce()
 		loadTransactions(1, 1000)
 	}, [])
 
