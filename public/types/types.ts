@@ -12,7 +12,12 @@ export interface Transaction {
 	date: string
 	receipt: string | null
 	isSynced: boolean
+	location: {
+		latitude: number
+		longitude: number
+	}
 }
+
 
 export interface TransactionProviderProps {
 	children: React.ReactNode
