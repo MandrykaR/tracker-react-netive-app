@@ -41,7 +41,6 @@ self.addEventListener('fetch', event => {
 	const url = new URL(event.request.url)
 
 	if (url.pathname.startsWith('/_expo/static/js/web')) {
-		// Динамическое кэширование JS-файлов
 		event.respondWith(
 			caches.match(event.request).then(cachedResponse => {
 				return (
@@ -54,15 +53,14 @@ self.addEventListener('fetch', event => {
 									return networkResponse
 								})
 							} else {
-								return caches.match('/+not-found.html') // Возвращаем fallback для JS
+								return caches.match('/+not-found.html')
 							}
 						})
-						.catch(() => caches.match('/+not-found.html')) // Обработка сетевых ошибок
+						.catch(() => caches.match('/+not-found.html'))
 				)
 			})
 		)
 	} else if (STATIC_FILES.includes(url.pathname)) {
-		// Обработка запросов для статических файлов
 		event.respondWith(
 			caches.match(event.request).then(cachedResponse => {
 				return (
@@ -76,12 +74,11 @@ self.addEventListener('fetch', event => {
 								return networkResponse
 							}
 						})
-						.catch(() => caches.match('/+not-found.html')) // Обработка сетевых ошибок
+						.catch(() => caches.match('/+not-found.html'))
 				)
 			})
 		)
 	} else {
-		// Все остальные запросы (fallback на index.html для SPA)
 		event.respondWith(async () =>
 			caches.match(event.request).then(async cachedResponse => {
 				return (
