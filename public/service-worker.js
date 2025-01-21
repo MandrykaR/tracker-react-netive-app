@@ -8,6 +8,7 @@ const STATIC_FILES = [
 	'/AddTransaction',
 	'/AnalyticsScreen',
 	'/TransactionContext',
+	'/register-sw.js',
 ]
 
 self.addEventListener('install', event => {
