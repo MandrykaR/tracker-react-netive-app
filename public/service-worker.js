@@ -86,7 +86,7 @@ self.addEventListener('fetch', event => {
 					cachedResponse ||
 					fetch(event.request)
 						.then(networkResponse => {
-							if (networkResponse && FnetworkResponse.status === 200) {
+							if (networkResponse && networkResponse.status === 200) {
 								return networkResponse
 							}
 						})
