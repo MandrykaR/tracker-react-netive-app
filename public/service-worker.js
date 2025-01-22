@@ -5,9 +5,9 @@ const STATIC_FILES = [
 	'/index.html',
 	'/manifest.json',
 	'/+not-found.html',
-	'/AddTransaction.html',
-	'/AnalyticsScreen.html',
-	'/TransactionContext.html',
+	'/AddTransaction',
+	'/AnalyticsScreen',
+	'/TransactionContext',
 	'/register-sw.js',
 ]
 

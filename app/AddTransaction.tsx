@@ -12,7 +12,7 @@ import {
 	StyleSheet,
 } from 'react-native'
 
-import { Colors } from '../constants/Colors'
+import { Colors } from '../constants/Colors.ts'
 import { useTransactions } from './TransactionContext.tsx'
 import { useCamera } from '@/hooks/useCamera'
 import CustomModal from '@/components/CustomModal'
