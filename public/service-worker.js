@@ -3,6 +3,13 @@ const CACHE_NAME = 'my-app-cache-v1'
 const STATIC_FILES = [
 	'/',
 	'/index.html',
+	'/assets/images/favicon.png',
+	'/assets/images/analytics-mobile.png',
+	'/assets/images/android-chrome-192x192.png',
+	'/assets/images/android-chrome-512x512.png',
+	'/assets/images/apple-touch-icon.png',
+	'/assets/images/home-screen-737px.png',
+	'/assets/images/screen-mobile.png',
 	'/manifest.json',
 	'/+not-found.html',
 	'/AddTransaction',
