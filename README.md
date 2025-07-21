@@ -26,4 +26,5 @@
 ### Author
 
 - Mandryka Roman
+- Igor Muntian
 
